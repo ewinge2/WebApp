@@ -1,0 +1,51 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Stats</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+
+<body>
+    <h1>Stats for Majors at Carleton</h1>
+    
+    <div id="container" style="width:1000px">
+        <div id="inputArea" style="width:400px;height=600px;float:left;">
+            <p class="input">
+            <form action="CarlStats.py" method="get">
+                <fieldset><legend>Year range</legend>
+                From: <input type="text" name="startYear" value=2012><br>
+                To:<input type="text" name="endYear" value=2013>
+                </fieldset>
+                
+                <fieldset><legend>Major List</legend>
+                <p>
+                <input type="checkbox" name="history" value=1>History<br>
+                <input type="checkbox" name="physics" value=1>Physics<br>
+                <input type="checkbox" name="math" value=1>Math<br>
+                <input type="checkbox" name="linguistics" value=1>Linguistics<br>
+                <input type="submit" value="Add" />
+                </p>
+                </fieldset>
+            </form>
+            </p>
+        </div>
+        
+        <div id="resultArea" style="width:600px;height=600px;float:right;">
+            <p class = 'result'>
+            Summary:<br>
+            Major:%s<br>
+            Year:%s
+            </p>
+        </div>
+        <div id="bottomComment" style="width:1000px;float:bottom">
+            <p><a href="CarlStats.py">python source code</a></p>
+            <p class="comment">Debug print: %s</p>
+        </div>
+    </div>
+
+
+
+
+</body>
+</html>

@@ -53,6 +53,14 @@ class DataSource:
            year is an integer. Throws an exception if the specified year 
            isn't a year in our dataset."""
         return 0
+        
+        
+    def get_number_of_degrees_from_year_span(self, startYear, endYear, step = 1):
+        '''
+        @return :return a list whose keys are years (int) and whose values are numbers of degrees
+        '''
+        
+        return []
     
     def get_number_of_degrees_from_all_years(self):
         """Returns a list of the total number of degrees awarded in any

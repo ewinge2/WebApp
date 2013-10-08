@@ -2,7 +2,7 @@
 
 import cgi
 
-class webpageInterface:
+class CarlStats:
 	def __init__(self):
 		self.initialContent = open('CarlStats.html').read()
 		self.major = ''
@@ -22,7 +22,7 @@ class webpageInterface:
 		print output 
 
 if __name__ == "__main__":	
-	site = webpageInterface()
+	site = CarlStats()
 	site.generate()
 
 # 	site.getInput()

@@ -1,8 +1,27 @@
-p.result{
-    color:red;
-    text-align: left;
-    font-family: arial;
-    margin-left: 30px;
+div.inputArea{
+	width: 300px;
+	float: left;
+}
+
+.resultArea{
+	width: 600px;
+	float: right;
+	text-align: left;
+}
+
+.tableArea{
+	border-collapse:collapse;
+
+}
+
+table, td, th{
+	border:1px solid black;
+	border-collapse: collapse;
+}
+
+div.wholePage{
+	width: 1000px;
+
 }
 
 h1{
@@ -10,4 +29,20 @@ h1{
 	text-align: middle;
 	font-family: arial;
 	font-size: 30pt;
+}
+
+p.timeSpan{
+
+}
+
+p.result{
+    color:red;
+    text-align: left;
+    font-family: arial;
+}
+
+p.input{
+	outline-width: 3px;
+	outline-style:dotted;
+	outline-color:#ff0000;
 }

@@ -40,10 +40,15 @@ class CarlStats:
 		self.rowTemplate = '<tr>%s</tr>'
 		self.dataTemplate = '<td>%s</td>'
 		self.tableHeadingTemplate = '<th>%s</th>'
-	 	self.tableTemplate = open('tableTemplate.html').read()
+	 	self.tableTemplate = '''	
+	 	<table border=\"1\" cellpadding=\"10\">
+		%s		
+		</table>'''
 	 	
-	 	self.checkboxCode = ''
 	 	self.tableHtml = ''
+	 	self.checkboxCode = ''
+	 	
+	 	self.gender = ['Male', 'Female', 'All Genders']
 		
 		for major in self.majorList:
 			self.majorChecked[major] = 0
@@ -55,17 +60,21 @@ class CarlStats:
 		'''
 		form = cgi.FieldStorage()
 		
-# 		self.startYear = form['startYear'].value
-# 		self.endYear = form['endYear'].value
-		
-		
+		if 'startYear' in form and 'endYear' in form:
+			self.startYear = int(form['startYear'].value)
+			self.endYear = int(form['endYear'].value)
+			
+		for gender in self.gender:
+			if gender in form:
+				genderSelected = gender
+						
 		for major in self.majorList:
 			'''
 			get user inputs in the checkboxes
 			'''
 			try:
 				if major in form:
-					self.majorChecked[major]= int(form[major].value)
+					self.majorChecked[major] = int(form[major].value)
 					self.isQueried = True
 			except Exception, e:
 				print "Content-type: text/html\r\n\r\n",
@@ -78,28 +87,35 @@ class CarlStats:
 		#also do other stuff...
 	
 	def produceCheckboxes(self):
+		'''
+		retain user inputs
+		'''
+		gender = ['Male', 'Female', 'All Genders']
+		   
 	    for major in self.majorList:
 	        checked = ''
 	        if self.majorChecked.get(major) == 1:
 	            checked = 'checked="checked"'
 	        self.checkboxCode += '<input type="checkbox" name="' + major + '" ' + checked + 'value=1>' + major +'<br>'
 	
-	def generateTableDataRow(self, dictionaryData):
+	def generateTableDataRow(self, majorName, listData):
 		'''
 		Add a row to the instance variable tableHtml
 		'''
-		row = ''
-		for elem in dictionaryData:
-			row = ''.join( [ row, self.dataTemplate % dictionaryData[elem] ] )
+		row = self.dataTemplate % majorName
+		for elem in listData:
+			row = ''.join( [ row, self.dataTemplate % elem ] )
 		row = self.rowTemplate % row
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
-	def generateTableHeaderRow(self):
+	def generateTableYearRow(self):
+		'''
+		Generate the top row which includes the year span of query
+		'''
 		row = self.tableHeadingTemplate % 'Year'
-		for year in range(self.startYear, self.endYear):
+		for year in range(self.startYear, self.endYear + 1):
 			row = ''.join([row, self.tableHeadingTemplate % year])
 		self.tableHtml = ''.join([self.tableHtml, row])
-		
 	
 	def generateTable(self):
 		self.tableHtml = self.tableTemplate % self.tableHtml
@@ -110,12 +126,11 @@ class CarlStats:
 		'''
 # 		stub
 		if self.isQueried:
-			stubHeader = {'Year':'Year', 1943:1943, 1945:1945, 1949: 1949, 1920:1920}
-			stubDict = {None: '', 1943:400, 1945:500, 1949: 600, 1920:610}
-			site.generateTableHeaderRow()
-			site.generateTableDataRow(stubDict)
+			stubList = [999, 1419, 1241, 1239, 2310]
+			self.generateTableYearRow() 
+			self.generateTableDataRow('stubMajor', stubList)
 			self.generateTable()
-			site.generateResult()
+			self.generateResult()
 		print "Content-type: text/html\r\r\n\n",
 		self.produceCheckboxes()
 		output = ''.join([self.openingHtml % self.checkboxCode, self.content, self.closingHtml])
@@ -123,9 +138,9 @@ class CarlStats:
 
 if __name__ == "__main__":
 # 	try:
-		site = CarlStats()
-		site.getInput()
-		site.generate()
+	site = CarlStats()
+	site.getInput()
+	site.generate()
 # 	except Exception, e:
 # 		print "Content-type: text/html\r\r\n\n",
 # 		print 

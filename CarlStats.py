@@ -1,8 +1,8 @@
 #!/usr/bin/python
 '''
 File:webapp.py
-Author: Anne Gross, Jialun "Julian" Luo
-Last edited: 2013/10/9
+Author: Anne Grosse, Jialun "Julian" Luo
+Last edited: 2013/10/10
 
 This program will generate a html to the browser to display. It will print a summary or results
 when user inputs are detected.

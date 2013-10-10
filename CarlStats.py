@@ -40,12 +40,7 @@ class CarlStats:
 		self.rowTemplate = '<tr>%s</tr>'
 		self.dataTemplate = '<td>%s</td>'
 		self.tableHeadingTemplate = '<th>%s</th>'
-	 	self.tableTemplate = 
-	 	'''
-	 		<table border="1" cellpadding="10">
-			%s		
-			</table>
-	 	'''
+	 	self.tableTemplate = open('tableTemplate.html').read()
 	 	
 	 	self.tableHtml = ''
 		
@@ -59,8 +54,8 @@ class CarlStats:
 		'''
 		form = cgi.FieldStorage()
 		
-		self.startYear = form['startYear'].value
-		self.endYear = form['endYear'].value
+# 		self.startYear = form['startYear'].value
+# 		self.endYear = form['endYear'].value
 		
 		
 		for major in self.majorList:
@@ -118,17 +113,16 @@ class CarlStats:
 		print output
 
 if __name__ == "__main__":
-	try:
+# 	try:
 		site = CarlStats()
 		site.getInput()
 		site.generate()
-	except Exception, e:
-		print "Content-type: text/html\r\r\n\n",
-		print e
-		print
-		print type()
-		print 'oops'
-		exit()
+# 	except Exception, e:
+# 		print "Content-type: text/html\r\r\n\n",
+# 		print 
+# 		print
+# 		print 'oops'
+# 		exit()
 # 	site.getInput()
 # 	site.generate()
 	

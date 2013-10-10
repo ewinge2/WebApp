@@ -1,7 +1,7 @@
 #!/usr/bin/python
 '''
 File:webapp.py
-Author: Jialun "Julian" Luo
+Author: Anne Gross, Jialun "Julian" Luo
 Last edited: 2013/10/9
 
 This program will generate a html to the browser to display. It will print a summary or results

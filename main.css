@@ -1,34 +1,42 @@
 div.inputArea{
-	width: 300px;
+	width: 350px;
+	float: left;
+}
+
+div.majorBoxes{
+	height: 350px;
+	overflow-y: scroll;
 	float: left;
 }
 
 .resultArea{
-	width: 600px;
+	width: 724px;
 	float: right;
 	text-align: left;
 }
 
-.tableArea{
-	border-collapse:collapse;
-
-}
 
 table, td, th{
-	border:1px solid black;
-	border-collapse: collapse;
+	
+	border-collapse:collapse;
 }
 
 div.wholePage{
-	width: 1000px;
+	width: 1100px;
+	
+}
 
+div.sourcelinks{
+	width: 350px;
+	float: left;
 }
 
 h1{
 	color:blue;
-	text-align: middle;
+	margin-left: 400px;
 	font-family: arial;
-	font-size: 30pt;
+	font-style: bold;
+	font-size: 25pt;
 }
 
 p.timeSpan{

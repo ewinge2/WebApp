@@ -15,21 +15,21 @@ class DataSource:
            any gender are considered."""
         return {}
         
-    def get_graduates_from_all_years(self, major = 'All', gender = 'All'):
+    def get_graduates_from_all_years(self, major = 'Total', gender = 'Both'):
         """Returns a dictionary with keys equal to each year in the dataset
            and values equal to the number of graduates with 
            the specified major and specified gender in a year.
            
            major is a string. Throws an exception if the specified major isn't 
-           a major in our dataset. If major is 'All', graduates of any major 
+           a major in our dataset. If major is 'Total', graduates of any major 
            are considered.
            
            gender is a string. Throws an exception if the specified gender
-           isn't 'Male', 'Female', or 'All'. If gender is All, graduates of 
+           isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
         return {}
         
-    def get_graduates_in_year_range(self, year_start, year_end, major = 'All', gender = 'All'):
+    def get_graduates_in_year_range(self, year_start, year_end, major = 'Total', gender = 'Both'):
         """Returns a dictionary of the total number of graduates with a given
            major and given gender in all years in the range specified by the user.
            
@@ -38,14 +38,14 @@ class DataSource:
            Throws an exception if year_start or year_end are not years in our dataset.
            
            major is a string. Throws an exception if the specified major isn't 
-           a major in our dataset. If major is 'All', graduates of any major 
+           a major in our dataset. If major is 'Total', graduates of any major 
            are considered.
            
            gender is a string. Throws an exception if the specified gender
-           isn't 'Male', 'Female', or 'All'. If gender is All, graduates of 
+           isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
         
-    def get_graduates_from_year(self, year, major = 'All', gender = 'All'):
+    def get_graduates_from_year(self, year, major = 'Total', gender = 'Both'):
         """Returns the number of graduates in a given year with a given major
            and given gender. 
            
@@ -53,11 +53,11 @@ class DataSource:
            isn't a year in our dataset.
            
            major is a string. Throws an exception if the specified major isn't 
-           a major in our dataset. If major is 'all', graduates of any major 
+           a major in our dataset. If major is 'Total', graduates of any major 
            are considered.
            
            gender is a string. Throws an exception if the specified gender
-           isn't 'Male', 'Female', or 'All'. If gender is All, graduates of 
+           isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
         return 0
     

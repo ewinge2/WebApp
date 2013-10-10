@@ -99,3 +99,12 @@ class DataSource:
     def get_years(self):
         """Returns a list of all years in the dataset."""
         return []
+        
+        def stub_getNumDegreesYearSpan(self, majorName, startYear, endYear):
+        '''
+        This is a stub method only used for testing the webapp.py
+        '''
+        listData = []
+        for i in range(startYear, endYear):
+            listData.append(100 * (i-2000))
+        return listData        

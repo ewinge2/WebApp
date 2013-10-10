@@ -30,16 +30,22 @@ class CarlStats:
 		self.content = ''
 		self.closingHtml = '''</body></html>'''
 		
-		self.startYear = 0
-		self.endYear = 0
+		self.startYear = 2013
+		self.endYear = 2013
+		
 		self.majorList = open('majorList.txt').read().splitlines()
 		self.majorChecked = {}
 		self.isQueried = False
 		
-		self.rowTemplate = open('rowTemplate.html').read()
-		self.dataTemplate = open('dataTemplate.html').read()
-		self.tableHeadingTemplate = open('tableHeadingTemplate.html').read()
-	 	self.tableTemplate = open('tableTemplate.html').read()
+		self.rowTemplate = '<tr>%s</tr>'
+		self.dataTemplate = '<td>%s</td>'
+		self.tableHeadingTemplate = '<th>%s</th>'
+	 	self.tableTemplate = 
+	 	'''
+	 		<table border="1" cellpadding="10">
+			%s		
+			</table>
+	 	'''
 	 	
 	 	self.tableHtml = ''
 		
@@ -52,6 +58,10 @@ class CarlStats:
 		Get user inputs from the python
 		'''
 		form = cgi.FieldStorage()
+		
+		self.startYear = form['startYear'].value
+		self.endYear = form['endYear'].value
+		
 		
 		for major in self.majorList:
 			'''
@@ -82,7 +92,11 @@ class CarlStats:
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
 	def generateTableHeaderRow(self):
-		pass
+		row = self.tableHeadingTemplate % 'Year'
+		for year in range(self.startYear, self.endYear):
+			row = ''.join([row, self.tableHeadingTemplate % year])
+		self.tableHtml = ''.join([self.tableHtml, row])
+		
 	
 	def generateTable(self):
 		self.tableHtml = self.tableTemplate % self.tableHtml
@@ -95,7 +109,7 @@ class CarlStats:
 		if self.isQueried:
 			stubHeader = {'Year':'Year', 1943:1943, 1945:1945, 1949: 1949, 1920:1920}
 			stubDict = {None: '', 1943:400, 1945:500, 1949: 600, 1920:610}
-			site.generateTableHeaderRow(stubHeader)
+			site.generateTableHeaderRow()
 			site.generateTableDataRow(stubDict)
 			self.generateTable()
 			site.generateResult()
@@ -104,13 +118,15 @@ class CarlStats:
 		print output
 
 if __name__ == "__main__":
-	try:	
+	try:
 		site = CarlStats()
 		site.getInput()
 		site.generate()
 	except Exception, e:
 		print "Content-type: text/html\r\r\n\n",
 		print e
+		print
+		print type()
 		print 'oops'
 		exit()
 # 	site.getInput()

@@ -36,10 +36,13 @@ class CarlStats:
 	
 		self.isQueried = False
 		
+		self.rowAltTemplate = '<tr class="alt">%s</tr>'
 		self.rowTemplate = '<tr>%s</tr>'
 		self.dataTemplate = '<td>%s</td>'
 		self.tableHeadingTemplate = '<th>%s</th>'
-	 	self.tableTemplate = open('tableTemplate.html').read()
+	 	self.tableTemplate = '<table border="1" cellpadding="10">%s</table>'
+	 	
+	 	self.rowColor = 0
 	 	
 	 	self.tableHtml = ''
 	 	
@@ -145,7 +148,11 @@ class CarlStats:
 		row = self.dataTemplate % majorName
 		for elem in listData:
 			row = ''.join( [ row, self.dataTemplate % elem ] )
-		row = self.rowTemplate % row
+		if (self.rowColor % 2):
+			row = self.rowTemplate % row
+		else:
+			row = self.rowAltTemplate % row
+		self.rowColor += 1
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
 	def generateTableYearRow(self):

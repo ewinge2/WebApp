@@ -48,36 +48,46 @@ class CarlStats:
 		self.initializeMajorInput()
 		self.genderList = ['Male', 'Female', 'Both']
 	
+		self.debug = 0
+	
+	
 	def initializeMajorInput(self):
 	    for major in self.majorList:
 			self.majorInput[major] = 0
-	    
+
+
+
 	def displayChosenGender(self):
 	    self.showAsSelected(self.gender, "checked")
 	    
 	def displayChosenYears(self):
 	    yearTag = ' selected="selected"'
-	    self.showAsSelected(self.startYear, yearTag)
-	    endIndex = self.openingHtml.find(str(self.endYear))
-	    self.showAsSelected(self.endYear, yearTag, endIndex)
+# 	    startYearIndex = self.openingHtml.find(str(self.startYear))
+	    self.showAsSelected(self.startYear, yearTag) #, startYearIndex
+	    endYearIndex = self.openingHtml.find(str('endYear'))
+	    self.showAsSelected(self.endYear, yearTag, endYearIndex)
 	    
 	def displayChosenMajors(self):
-	    majorTag = "checked"
+	    majorCheckTag = "checked"
 	    for major in self.majorList:
 	        if self.majorInput.get(major) == 1:
-	            self.showAsSelected(major, majorTag)
-	    
+	            self.showAsSelected(major, majorCheckTag)
+
+
+	
 	def showAsSelected(self, name, tag, indexToStartLooking=0):
 	    index = self.findIndexForSelectionTag(name, indexToStartLooking)
 	    self.insertSelectionTag(index, tag)
 	    
 	def findIndexForSelectionTag(self, name, indexToStartLooking=0):
-	    nameQuotes = '"' + str(name) + '"'
-	    html = self.openingHtml[indexToStartLooking:]
-	    return html.find(nameQuotes) + len(nameQuotes)
+	    nameQuotes = '\"' + str(name) + '\"'
+	    return self.openingHtml.find(nameQuotes, indexToStartLooking) + len(nameQuotes)
 	
 	def insertSelectionTag(self, index, tag):
 	    self.openingHtml = self.openingHtml[:index] + tag + self.openingHtml[index:]
+	
+	
+	
 	
 	def getMajorInput(self, form):
 	    for major in self.majorList:
@@ -96,6 +106,9 @@ class CarlStats:
 			try: self.endYear = int(form['endYear'].value)
 			except Exception, e:
 			    pass
+			if self.endYear < self.startYear:
+				self.endYear = self.startYear
+		
 	        ### if startYear or endYear isn't an int, assigns them default value of 2013
 	        ### there will still be an issue when using DataSource.py if startYear > endYear
 	
@@ -115,29 +128,40 @@ class CarlStats:
 		self.getMajorInput(form)
 		self.getGenderInput(form)
 		
+		
+		
 	def generateResult(self):
 		self.content = open('CarlStatsResult.html').read() % self.tableHtml
 		#also do other stuff...
 	
-	def generateTableDataRow(self, dictionaryData):
+	
+	
+	
+	def generateTableDataRow(self, majorName, listData):
 		'''
 		Add a row to the instance variable tableHtml
 		'''
-		row = ''
-		for elem in dictionaryData:
-			row = ''.join( [ row, self.dataTemplate % dictionaryData[elem] ] )
+		row = self.dataTemplate % majorName
+		for elem in listData:
+			row = ''.join( [ row, self.dataTemplate % elem ] )
 		row = self.rowTemplate % row
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
-	def generateTableHeaderRow(self):
+	def generateTableYearRow(self):
+		'''
+		Generate the top row which depends on the year span
+		'''
 		row = self.tableHeadingTemplate % 'Year'
-		for year in range(int(self.startYear), int(self.endYear)):
+		for year in range(self.startYear, self.endYear + 1):
 			row = ''.join([row, self.tableHeadingTemplate % year])
 		self.tableHtml = ''.join([self.tableHtml, row])
-		
 	
 	def generateTable(self):
 		self.tableHtml = self.tableTemplate % self.tableHtml
+
+
+
+
 
 	def generate(self):
 		'''
@@ -145,18 +169,19 @@ class CarlStats:
 		'''
 # 		stub
 		if self.isQueried:
-			stubHeader = {'Year':'Year', 1943:1943, 1945:1945, 1949: 1949, 1920:1920}
 			stubDict = {None: '', 1943:400, 1945:500, 1949: 600, 1920:610}
-			site.generateTableHeaderRow()
-			site.generateTableDataRow(stubDict)
+			self.generateTableYearRow()
+			self.generateTableDataRow('stubMajorName', stubDict)
 			self.generateTable()
-			site.generateResult()
+			self.generateResult()
 		print "Content-type: text/html\r\r\n\n",
 		self.displayChosenYears()
 		self.displayChosenGender()
 		self.displayChosenMajors()
 		output = ''.join([self.openingHtml, self.content, self.closingHtml])
 		print output
+		
+		print self.debug
 
 if __name__ == "__main__":
 	site = CarlStats()

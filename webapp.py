@@ -58,12 +58,13 @@ class CarlStats:
 
 
 	def displayChosenGender(self):
+		
 	    self.showAsSelected(self.gender, "checked")
 	    
 	def displayChosenYears(self):
+
 	    yearTag = ' selected="selected"'
-# 	    startYearIndex = self.openingHtml.find(str(self.startYear))
-	    self.showAsSelected(self.startYear, yearTag) #, startYearIndex
+	    self.showAsSelected(self.startYear, yearTag)
 	    endYearIndex = self.openingHtml.find(str('endYear'))
 	    self.showAsSelected(self.endYear, yearTag, endYearIndex)
 	    
@@ -151,7 +152,7 @@ class CarlStats:
 		'''
 		Generate the top row which depends on the year span
 		'''
-		row = self.tableHeadingTemplate % 'Year'
+		row = self.tableHeadingTemplate % 'Major| Year->'
 		for year in range(self.startYear, self.endYear + 1):
 			row = ''.join([row, self.tableHeadingTemplate % year])
 		self.tableHtml = ''.join([self.tableHtml, row])
@@ -159,21 +160,28 @@ class CarlStats:
 	def generateTable(self):
 		self.tableHtml = self.tableTemplate % self.tableHtml
 
+	
+	def queryData(self):
+		if self.isQueried:
+			database = DataSource.DataSource()
+			self.generateTableYearRow()
+			for major in self.majorList:
+				if self.majorInput[major] != 0:
+					majorName = major
+					majorData = database.stub_getNumDegreesYearSpan(majorName, self.startYear, self.endYear+1)
+					self.generateTableDataRow(majorName, majorData)
+					
+			self.generateTable()
+			self.generateResult()
 
-
-
+	
 
 	def generate(self):
 		'''
 		Calling this to complete the html file
+		@todo: stubs!!!
 		'''
-# 		stub
-		if self.isQueried:
-			stubDict = {None: '', 1943:400, 1945:500, 1949: 600, 1920:610}
-			self.generateTableYearRow()
-			self.generateTableDataRow('stubMajorName', stubDict)
-			self.generateTable()
-			self.generateResult()
+		
 		print "Content-type: text/html\r\r\n\n",
 		self.displayChosenYears()
 		self.displayChosenGender()
@@ -181,11 +189,11 @@ class CarlStats:
 		output = ''.join([self.openingHtml, self.content, self.closingHtml])
 		print output
 		
-		print self.debug
 
 if __name__ == "__main__":
 	site = CarlStats()
 	site.getInput()
+	site.queryData()
 	site.generate()
 
 	

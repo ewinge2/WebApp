@@ -42,6 +42,7 @@ class CarlStats:
 		self.tableHeadingTemplate = '<th>%s</th>'
 	 	self.tableTemplate = open('tableTemplate.html').read()
 	 	
+	 	self.checkboxCode = ''
 	 	self.tableHtml = ''
 		
 		for major in self.majorList:
@@ -64,7 +65,7 @@ class CarlStats:
 			'''
 			try:
 				if major in form:
-					self.majorChecked[major]= form[major].value
+					self.majorChecked[major]= int(form[major].value)
 					self.isQueried = True
 			except Exception, e:
 				print "Content-type: text/html\r\n\r\n",
@@ -75,6 +76,13 @@ class CarlStats:
 	def generateResult(self):
 		self.content = open('CarlStatsResult.html').read() % self.tableHtml
 		#also do other stuff...
+	
+	def produceCheckboxes(self):
+	    for major in self.majorList:
+	        checked = ''
+	        if self.majorChecked.get(major) == 1:
+	            checked = 'checked="checked"'
+	        self.checkboxCode += '<input type="checkbox" name="' + major + '" ' + checked + 'value=1>' + major +'<br>'
 	
 	def generateTableDataRow(self, dictionaryData):
 		'''
@@ -109,7 +117,8 @@ class CarlStats:
 			self.generateTable()
 			site.generateResult()
 		print "Content-type: text/html\r\r\n\n",
-		output = ''.join([self.openingHtml, self.content, self.closingHtml])
+		self.produceCheckboxes()
+		output = ''.join([self.openingHtml % self.checkboxCode, self.content, self.closingHtml])
 		print output
 
 if __name__ == "__main__":

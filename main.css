@@ -17,8 +17,18 @@ div.majorBoxes{
 
 
 table, td, th{
-	
+	border: 1px solid green;
 	border-collapse:collapse;
+}
+
+tr.alt{
+	background-color:#EAF2D3;
+}
+
+th{
+	font: arial;
+	color: white;
+	background-color: #A7C942;
 }
 
 div.wholePage{

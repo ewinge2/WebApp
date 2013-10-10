@@ -52,33 +52,32 @@ class CarlStats:
 	    for major in self.majorList:
 			self.majorInput[major] = 0
 	    
-	def showYearAsSelected(self, year, indexToStartLooking):
-	    html = self.openingHtml[indexToStartLooking:]
-	    stYr = '"' + str(year) + '"'
-	    stYrPos = html.find(stYr) + len(stYr)
-	    self.openingHtml = self.openingHtml[:indexToStartLooking] + html[:stYrPos] + ' selected="selected"' + html[stYrPos:]
-	    
 	def displayChosenGender(self):
-	    html = self.openingHtml
-	    gdrStr = '"' + self.gender + '"'
-	    gdrPos = html.find(gdrStr) + len(gdrStr)
-	    self.openingHtml = html[:gdrPos] + " checked" + html[gdrPos:]
+	    self.showAsSelected(self.gender, "checked")
 	    
 	def displayChosenYears(self):
-	    self.showYearAsSelected(self.startYear, 0)
+	    yearTag = ' selected="selected"'
+	    self.showAsSelected(self.startYear, yearTag)
 	    endIndex = self.openingHtml.find(str(self.endYear))
-	    self.showYearAsSelected(self.endYear, endIndex)
+	    self.showAsSelected(self.endYear, yearTag, endIndex)
 	    
 	def displayChosenMajors(self):
+	    majorTag = "checked"
 	    for major in self.majorList:
 	        if self.majorInput.get(major) == 1:
-	            self.showMajorAsSelected(major)
-        
-	def showMajorAsSelected(self, major):
-	    html = self.openingHtml
-	    mjrStr = '"' + major + '"'
-	    mjrPos = html.find(mjrStr) + len(mjrStr)
-	    self.openingHtml = html[:mjrPos] + ' checked="checked"' + html[mjrPos:]
+	            self.showAsSelected(major, majorTag)
+	    
+	def showAsSelected(self, name, tag, indexToStartLooking=0):
+	    index = self.findIndexForSelectionTag(name, indexToStartLooking)
+	    self.insertSelectionTag(index, tag)
+	    
+	def findIndexForSelectionTag(self, name, indexToStartLooking=0):
+	    nameQuotes = '"' + str(name) + '"'
+	    html = self.openingHtml[indexToStartLooking:]
+	    return html.find(nameQuotes) + len(nameQuotes)
+	
+	def insertSelectionTag(self, index, tag):
+	    self.openingHtml = self.openingHtml[:index] + tag + self.openingHtml[index:]
 	
 	def getMajorInput(self, form):
 	    for major in self.majorList:

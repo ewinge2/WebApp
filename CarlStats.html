@@ -19,6 +19,7 @@
                     From: </td>
                     <td>
                         <select name="startYear">
+                        <option value="2013">2013</option>
                         <option value="2012">2012</option>
                         <option value="2011">2011</option>
                         <option value="2010">2010</option>
@@ -139,6 +140,7 @@
                     To:</td>
                     <td>
                     <select name="endYear">
+                        <option value="2013">2013</option>
                         <option value="2012">2012</option>
                         <option value="2011">2011</option>
                         <option value="2010">2010</option>
@@ -259,8 +261,14 @@
                 </p>
                 </fieldset>
                 
+                <fieldset><legend>Gender</legend>
+                    <input type="radio">
+                </fieldset>
+
                 <fieldset><legend>Major List</legend>
-                <p class="majorBoxes">
+                <input type="submit" value="Submit" />
+                <div class="majorBoxes">
+                <p>
                 <input type="checkbox" name="African/Afr-American Studies" value=1>African/Afr-American Studies<br>
                 <input type="checkbox" name="American Studies" value=1>American Studies<br>
                 <input type="checkbox" name="Art: History" value=1>Art: History<br>
@@ -309,10 +317,22 @@
                 <input type="checkbox" name="Theater Arts" value=1>Theater Arts<br>
                 <input type="checkbox" name="Women's and Gender Studies" value=1>Women's and Gender Studies<br>
                 <input type="checkbox" name="Women's Studies" value=1>Women's Studies<br>
-                <input type="submit" value="Add" />
+                
                 </p>
                 </fieldset>
+                </div>
+
             </form>
         </div>
-        
+    <div class="resultArea">
+        <fieldset><legend>Links to source files</legend>
+        <p>
+        <p class="forClassUse">
+        <a href="webapp.py?showsource=webapp.py">webapp.py</a>
+        <a href="webapp.py?showsource=CarlStats.html">CarlStats.html</a>
+        <a href="main.css?showsource=main.css">style.css</a>
+        </p>
+        </fieldset>
+    </div>
+
 

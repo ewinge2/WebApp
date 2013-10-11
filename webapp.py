@@ -30,6 +30,9 @@ class CarlStats:
 		self.content = ''
 		self.closingHtml = '''</body></html>'''
 		
+		self.minYear = 2001
+		self.maxYear = 2013
+		
 		self.startYear = 2013
 		self.endYear = 2013
 		self.gender = "T"
@@ -60,9 +63,10 @@ class CarlStats:
 
 
 	def getShowsourceInput(self, form):
+		showsource=''
 		if 'showsource' in form:
 			showsource = form['showsource'].value
-		self.printFileAsPlainText(showsource)
+			self.printFileAsPlainText(showsource)
 		
 	def printFileAsPlainText(self,fileName):
 	    ''' 
@@ -84,13 +88,15 @@ class CarlStats:
 
 
 	def displayChosenGender(self):
-	    self.showAsSelected(self.gender, "checked")
+		'''Retain user inputs for gender'''
+		self.showAsSelected(self.gender, "checked")
 	    
 	def displayChosenYears(self):
-	    yearTag = ' selected="selected"'
-	    self.showAsSelected(self.startYear, yearTag)
-	    endYearIndex = self.openingHtml.find(str('endYear'))
-	    self.showAsSelected(self.endYear, yearTag, endYearIndex)
+		'''Retain user inputs for year span'''
+		yearTag = ' selected="selected"'
+		self.showAsSelected(self.startYear, yearTag)
+		endYearIndex = self.openingHtml.find(str('endYear'))
+		self.showAsSelected(self.endYear, yearTag, endYearIndex)
 	    
 	def displayChosenMajors(self):
 	    majorCheckTag = "checked"
@@ -131,8 +137,23 @@ class CarlStats:
 			try: self.endYear = int(form['endYear'].value)
 			except Exception, e:
 			    pass
+
+			if self.startYear < self.minYear:
+				self.startYear = self.minYear
+			elif self.startYear > self.maxYear:
+				self.startYear = self.maxYear
+			
+			if self.endYear > self.maxYear:
+				self.endYear = self.maxYear
+			elif self.endYear < self.minYear:
+				self.endYear = self.minYear
+			
 			if self.endYear < self.startYear:
 				self.endYear = self.startYear
+			
+			
+				
+
 		
 	        ### if startYear or endYear isn't an int, assigns them default value of 2013
 	        ### there will still be an issue when using DataSource.py if startYear > endYear
@@ -149,10 +170,11 @@ class CarlStats:
 		'''
 		form = cgi.FieldStorage()
 		
-		self.getShowsourceInput(form)
+
 		self.getYearInput(form)
 		self.getMajorInput(form)
 		self.getGenderInput(form)
+		self.getShowsourceInput(form)
 		
 		
 		
@@ -232,5 +254,4 @@ if __name__ == "__main__":
 	site.generate()
 
 	
-
 

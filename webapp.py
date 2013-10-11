@@ -32,14 +32,17 @@ class CarlStats:
 		
 		self.startYear = 2013
 		self.endYear = 2013
-		self.gender = "Both"
+		self.gender = "T"
 	
 		self.isQueried = False
 		
+		self.rowAltTemplate = '<tr class="alt">%s</tr>'
 		self.rowTemplate = '<tr>%s</tr>'
 		self.dataTemplate = '<td>%s</td>'
-		self.tableHeadingTemplate = '<th>%s</th>'
-	 	self.tableTemplate = open('tableTemplate.html').read()
+		self.tableHeadingTemplate = '<th rowspan="%s">%s</th>'
+	 	self.tableTemplate = '<table class="resultTable" border="1" cellpadding="7">%s</table>'
+	 	
+	 	self.rowColor = 0
 	 	
 	 	self.tableHtml = ''
 	 	
@@ -47,7 +50,7 @@ class CarlStats:
 		self.majorInput = {}
 		self.initializeMajorInput()
 		self.genderList = ['Male', 'Female', 'Both']
-	
+		
 		self.debug = 0
 	
 	
@@ -58,11 +61,9 @@ class CarlStats:
 
 
 	def displayChosenGender(self):
-		
 	    self.showAsSelected(self.gender, "checked")
 	    
 	def displayChosenYears(self):
-
 	    yearTag = ' selected="selected"'
 	    self.showAsSelected(self.startYear, yearTag)
 	    endYearIndex = self.openingHtml.find(str('endYear'))
@@ -115,7 +116,7 @@ class CarlStats:
 	
 	def getGenderInput(self, form):
 	    if "gender" in form:
-	        if form["gender"].value == "Male" or form["gender"].value == "Female":
+	        if form["gender"].value == "M" or form["gender"].value == "F" or form['gender'].value == 'T':
 	            self.gender = form["gender"].value
 	        ### if user messes with URL and gender isn't male or female, it's assigned default value of "both"
 	
@@ -145,16 +146,23 @@ class CarlStats:
 		row = self.dataTemplate % majorName
 		for elem in listData:
 			row = ''.join( [ row, self.dataTemplate % elem ] )
-		row = self.rowTemplate % row
+		if (self.rowColor % 2):
+			row = self.rowTemplate % row
+		else:
+			row = self.rowAltTemplate % row
+		self.rowColor += 1
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
 	def generateTableYearRow(self):
 		'''
 		Generate the top row which depends on the year span
 		'''
-		row = self.tableHeadingTemplate % 'Major| Year->'
+		row = self.tableHeadingTemplate % (1, 'YEAR')
 		for year in range(self.startYear, self.endYear + 1):
-			row = ''.join([row, self.tableHeadingTemplate % year])
+			row = ''.join([row, self.tableHeadingTemplate % (2, year)])
+		row = self.rowTemplate % row
+		majorHeading = self.tableHeadingTemplate % (1, 'MAJOR')
+		row = ''.join([row, self.rowTemplate % majorHeading])
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
 	def generateTable(self):
@@ -167,8 +175,11 @@ class CarlStats:
 			self.generateTableYearRow()
 			for major in self.majorList:
 				if self.majorInput[major] != 0:
+					'''
+					@todo: gender specification hasn't been implemented yet!!!
+					'''
 					majorName = major
-					majorData = database.stub_getNumDegreesYearSpan(majorName, self.startYear, self.endYear+1)
+					majorData = database.getNumGraduateInYearSpan(self.startYear, self.endYear, majorName, self.gender)
 					self.generateTableDataRow(majorName, majorData)
 					
 			self.generateTable()

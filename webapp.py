@@ -35,7 +35,7 @@ class CarlStats:
 		
 		self.startYear = 2013
 		self.endYear = 2013
-		self.gender = "T"
+		self.gender = "Both"
 	
 		self.isQueried = False
 		
@@ -117,8 +117,11 @@ class CarlStats:
 	def insertSelectionTag(self, index, tag):
 	    self.openingHtml = self.openingHtml[:index] + tag + self.openingHtml[index:]
 	
-	
-	
+	def generateCheckboxCode(self):
+		checkboxCode = ""
+		for major in self.majorList:
+			checkboxCode += '<input type="checkbox" name="' + major +'" value=1>' + major + '<br>'
+		return checkboxCode
 	
 	def getMajorInput(self, form):
 	    for major in self.majorList:
@@ -160,7 +163,7 @@ class CarlStats:
 	
 	def getGenderInput(self, form):
 	    if "gender" in form:
-	        if form["gender"].value == "M" or form["gender"].value == "F" or form['gender'].value == 'T':
+	        if form["gender"].value == "Male" or form["gender"].value == "Female" or form['gender'].value == 'Both':
 	            self.gender = form["gender"].value
 	        ### if user messes with URL and gender isn't male or female, it's assigned default value of "both"
 	
@@ -225,8 +228,12 @@ class CarlStats:
 					@todo: gender specification hasn't been implemented yet!!!
 					'''
 					majorName = major
-					majorData = database.getNumGraduateInYearSpan(self.startYear, self.endYear, majorName, self.gender)
-					self.generateTableDataRow(majorName, majorData)
+					majorNumGradDict = database.get_graduates_in_year_range(self.startYear, self.endYear, majorName, self.gender)
+					numGradList = []
+					for year in range(self.startYear, self.endYear+1):
+						numGradList.append(majorNumGradDict[year])
+					
+					self.generateTableDataRow(majorName, numGradList)
 					
 			self.generateTable()
 			self.generateResult()
@@ -243,7 +250,7 @@ class CarlStats:
 		self.displayChosenYears()
 		self.displayChosenGender()
 		self.displayChosenMajors()
-		output = ''.join([self.openingHtml, self.content, self.closingHtml])
+		output = ''.join([self.openingHtml % self.generateCheckboxCode(), self.content, self.closingHtml])
 		print output
 		
 

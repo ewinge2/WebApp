@@ -59,6 +59,29 @@ class CarlStats:
 			self.majorInput[major] = 0
 
 
+	def getShowsourceInput(self, form):
+		if 'showsource' in form:
+			showsource = form['showsource'].value
+		self.printFileAsPlainText(showsource)
+		
+	def printFileAsPlainText(self,fileName):
+	    ''' 
+	    	Credit: Jeff Ondich
+	    	Prints to standard output the contents of the specified file, preceded
+	        by a "Content-type: text/plain" HTTP header.
+	    '''
+	    text = ''
+	    try:
+	        f = open(fileName)
+	        text = f.read()
+	        f.close()
+	    except Exception, e:
+	        pass
+	
+	    print 'Content-type: text/plain\r\n\r\n',
+	    print text
+
+
 
 	def displayChosenGender(self):
 	    self.showAsSelected(self.gender, "checked")
@@ -126,6 +149,7 @@ class CarlStats:
 		'''
 		form = cgi.FieldStorage()
 		
+		self.getShowsourceInput(form)
 		self.getYearInput(form)
 		self.getMajorInput(form)
 		self.getGenderInput(form)

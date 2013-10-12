@@ -1,21 +1,14 @@
 import psycopg2
 
-
 class DataSource:
-    def __init__(self):
-        '''
-        @attentions: You need to fill in the psw password, dbn database name (which is just your username)
-        and usn username. Otherwise, it will not connect to anywhere
-        '''
-        psw = ''
-        dbn = ''
-        usn = ''
-        comm = psycopg2.connect(database = dbn, user=usn, password=psw)
-        self.cursor = comm.cursor()
-        
-
-    def get_all_graduates_from_year(self, year, gender = 'T'):
-        """Returns a dictionary with keys equal to each major in the dataset
+    def __init__(self, _user = 'ewinge', _password = 'riker692puppy'):
+        self.user = _user
+        self.password = _password
+        self.connection = psycopg2.connect(user = self.user, database = self.user, password = self.password)
+        self.cursor = self.connection.cursor()
+    
+    def get_all_graduates_from_year(self, year, gender = 'Both'):
+	"""Returns a dictionary with keys equal to each major in the dataset
            and values equal to the number of graduates with specified gender
            and with majors that are the corresponding key.
            
@@ -23,67 +16,96 @@ class DataSource:
            isn't a year in our dataset.
            
            gender is a string. Throws an exception if specified gender 
-           isn't 'male', 'female', or 'all'. If gender is all, graduates of 
+           isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
-        return {}
+    	results = {}
+    	query = "SELECT gendercode FROM gender WHERE gender = '%s';" %(gender)
+    	self.cursor.execute(query)
+	    gender = self.cursor.fetchone()[0]
+    	majors = self.get_major_codes()
+    	for major in majors:
+	    	query = "SELECT majors.major, majorcounts.graduates FROM majorcounts, majors WHERE majorcounts.year = %s AND majorcounts.gender = %s AND majorcounts.major = %s AND majors.majorcode = %s;" %(year, gender, major, major)
+		    self.cursor.execute(query)
+		    for k,v in self.cursor.fetchall():
+			    results.setdefault(k,[]).append(v)	
+	
+	    return results
         
-    def get_graduates_from_all_years(self, major = 'all', gender = 'T'):
-        """Returns a dictionary with keys equal to each year in the dataset
+    def get_graduates_from_all_years(self, major = 'Total', gender = 'Both'):
+	    """Returns a dictionary with keys equal to each year in the dataset
            and values equal to the number of graduates with 
            the specified major and specified gender in a year.
            
            major is a string. Throws an exception if the specified major isn't 
-           a major in our dataset. If major is 'all', graduates of any major 
+           a major in our dataset. If major is 'Total', graduates of any major 
            are considered.
            
            gender is a string. Throws an exception if the specified gender
-           isn't 'male', 'female', or 'all'. If gender is all, graduates of 
+           isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
-        return {}
+    	return get_graduates_in_year_range(2000,2013,major,gender)
         
-    def getNumGraduateInYearSpan(self, startYear, endYear, major = '', gender = 'T'):
-        '''
-        @return: a list of number of graduates of a specific major 
-        in the given year span, ordered by year ascendingly.
-        '''
-        if not major:
-            'if no major is given, cancel this execution, because I have not figured out what exactly happened'
-            return
-        
-        query = 'SELECT graduates FROM majors WHERE year >= %s AND year <= %s AND major=\'%s\'AND gender=\'%s\' ORDER BY year ASC;'
-        query = query % (startYear, endYear, major, gender)
-        
-        self.cursor.execute(query)
-        rawDataList = self.cursor.fetchall()
-        numGraduateInYearSpan = []
-        for data in rawDataList:
-            numGraduateInYearSpan.append(data[0])           
-        return numGraduateInYearSpan
-        
-    def get_graduates_from_year(self, year, major = 'all', gender = 'T'):
-        """Returns the number of graduates in a given year with a given major
-           and given gender. 
+    def get_graduates_in_year_range(self, start_year, end_year, major = 'Total', gender = 'Both'):
+    	"""Returns a dictionary of the total number of graduates with a given
+           major and given gender in all years in the range specified by the user.
            
-           year is an integer. Throws an exception if the specified year 
-           isn't a year in our dataset.
+           year_start and year_end are integers. year_start and year_end specify
+           the range of years for which the dictionary includes information on graduates.
+           Throws an exception if year_start or year_end are not years in our dataset.
            
            major is a string. Throws an exception if the specified major isn't 
-           a major in our dataset. If major is 'all', graduates of any major 
+           a major in our dataset. If major is 'Total', graduates of any major 
            are considered.
            
            gender is a string. Throws an exception if the specified gender
-           isn't 'male', 'female', or 'all'. If gender is all, graduates of 
+           isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
-        return 0
+	    results = {}
+    	query = "SELECT majorcode FROM majors WHERE major = '%s';" %(major)
+    	self.cursor.execute(query)
+    	major = self.cursor.fetchone()[0]
+    	query = "SELECT gendercode FROM gender WHERE gender = '%s';" %(gender)
+    	self.cursor.execute(query)
+    	gender = self.cursor.fetchone()[0]
+    	query = "SELECT major, graduates FROM majorcounts WHERE (year BETWEEN %s AND %s) AND major = %s AND gender = %s;"%(start_year, end_year, major, gender)
+    	self.cursor.execute(query)
+    	for k,v in self.cursor.fetchall():
+    		results.setdefault(k,[]).append(v)
+    	return results
+        
+    def get_graduates_from_year(self, year, major = 'Total', gender = 'Both'):
+    	"""Returns the number of graduates in a given year with a given major
+           and given gender. 
+           
+           year is an integer.            
+           major is a string. Throws an exception if the specified major isn't 
+           a major in our dataset. If major is 'Total', graduates of any major 
+           are considered.
+           
+           gender is a string. Throws an exception if the specified gender
+           isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
+           any gender are considered."""
+
+	    query = "SELECT majorcode FROM majors WHERE major = '%s';" %(major)
+    	self.cursor.execute(query)
+    	major = self.cursor.fetchone()[0]
+    	query = "SELECT gendercode FROM gender WHERE gender = '%s';" %(gender)
+    	self.cursor.execute(query)
+    	gender = self.cursor.fetchone()[0]
+    	query = "SELECT graduates FROM majorcounts WHERE year = %s AND major = %s AND gender = %s;"%(year,major,gender)
+    	self.cursor.execute(query)
+    	return self.cursor.fetchone()[0]
     
     def get_number_of_degrees_from_year(self, year):
-        """Returns the total number of degrees awarded in any major in a given 
+	    """Returns the total number of degrees awarded in any major in a given 
            year. Note that this is different from the total number of graduates:
            some graduates may be awarded degrees in mutliple majors.
            
            year is an integer. Throws an exception if the specified year 
            isn't a year in our dataset."""
-        return 0
+    	query = "SELECT graduates FROM majorcounts WHERE year = %s AND gender = %s AND major = %s;" %(year,2,49)
+    	self.cursor.execute(query)
+    	return self.cursor.fetchone()[0]
     
     def get_number_of_degrees_from_all_years(self):
         """Returns a dictionary of the total number of degrees awarded in any
@@ -92,9 +114,16 @@ class DataSource:
            number of degrees awarded is different from the total number of 
            graduates because some graduates may be awarded degrees in mutliple 
            majors."""
-        return {}
+        results = {}
+        query = "SELECT year, graduates FROM majorcounts WHERE major = %s AND gender = %s;" %(48,2)
+        self.cursor.execute(query)
+        for k,v in self.cursor.fetchall():
+            	results.setdefault(k,[]).append(v)
+        return results
+
+
     
-    def get_number_of_degrees_in_year_range(self, year_start, year_end):
+    def get_number_of_degrees_in_year_range(self, start_year, end_year):
         """Returns a dictionary of the total number of degrees awarded in any
            major for all years in the user-specified range. Keys are years and 
            values are the corresponding number of degrees awarded. Note that the
@@ -106,4 +135,39 @@ class DataSource:
            specify the range of years for which the dictionary contains information
            on degrees. Throws an exception if year_start or year_end are not 
            years in our dataset."""
-        return {}
+        results = {}       
+        query = "SELECT year, graduates FROM majorcounts WHERE (year BETWEEN %s AND %s) AND major = %s AND gender = %s;" %(start_year, end_year, 48, 2)
+        self.cursor.execute(query)
+        for k,v in self.cursor.fetchall():
+		results[k].append(v)
+        return results
+           
+    
+    def get_majors(self):
+        """Returns a list of all majors in the dataset."""
+        list_of_majors = []
+        query = "SELECT major FROM majors;"
+        self.cursor.execute(query)
+        for major in self.cursor.fetchall():
+            list_of_majors.append(major)
+        return list_of_majors
+        
+    def get_years(self):
+        """Returns a list of all years in the dataset."""
+        list_of_years = []
+        query = "SELECT year FROM majorcounts WHERE major = 0 AND gender = 0;"
+        self.cursor.execute(query)
+        for year in self.cursor.fetchall():
+            list_of_years.append(year)
+        return list_of_years
+
+    def get_major_codes(self):
+    	'''returns a list of all possible major codes'''
+    	major_codes = []
+    	query = "SELECT majorcode FROM majors;"
+    	self.cursor.execute(query)
+    	for major in self.cursor.fetchall():
+    		major_codes.append(major[0])
+    	return major_codes
+        
+        

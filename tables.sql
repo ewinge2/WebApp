@@ -26,7 +26,7 @@ INSERT INTO majors (major, majorcode) VALUES('Chinese', 8);
 INSERT INTO majors (major, majorcode) VALUES('Cinema and Media Studies', 9);
 INSERT INTO majors (major, majorcode) VALUES('Classical Languages', 10);
 INSERT INTO majors (major, majorcode) VALUES('Classical Studies', 11);
-INSERT INTO majors (major, majorcode) VALUES('Classics', 12);
+--INSERT INTO majors (major, majorcode) VALUES('Classics', 12);
 INSERT INTO majors (major, majorcode) VALUES('Cognitive Studies/Cognitive Science', 13);
 INSERT INTO majors (major, majorcode) VALUES('Computer Science', 14);
 INSERT INTO majors (major, majorcode) VALUES('Dance', 15);

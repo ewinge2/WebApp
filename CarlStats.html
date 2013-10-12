@@ -11,12 +11,12 @@
     <div id="container" class="wholePage">
         <div id="inputArea" class="inputArea">
             <form action="webapp.py" method="get">
-                <input type="submit" value="Submit" />
-                <input type="reset" value="Reset" />
+                <button type="submit" name="queryType" value="normal">Query Majors and Number of Students in the Majors</button> 
+                <!-- <input type="reset" value="Reset" /> -->
                 <fieldset><legend><p>Year range</p></legend>
                 <p>
                 <table class="timeSpan">
-                <tr><td>
+                <tr class="timeSpan"><td class="timeSpan">
                     From: </td>
                     <td>
                         <select name="startYear">
@@ -36,9 +36,9 @@
 
                         </select>
                         </td>
-                    <td>
+                    <td class="timeSpan">
                     To:</td>
-                    <td>
+                    <td class="timeSpan">
                     <select name="endYear">
                         <option value="2013">2013</option>
                         <option value="2012">2012</option>
@@ -61,62 +61,19 @@
                 </fieldset>
                 
                 <fieldset><legend>Gender</legend>
-                    <input type="radio" name="gender" value="M"> Male<br>
-                    <input type="radio" name="gender" value="F"> Female<br>
-                    <input type="radio" name="gender" value="T"> Both<br>
+                    <input type="radio" name="gender" value="Male"> Male<br>
+                    <input type="radio" name="gender" value="Female"> Female<br>
+                    <input type="radio" name="gender" value="Both"> Both<br>
+                    <!--<input type="radio" name="gender" value="B"> Breakdown<br>-->
+                    <!--Awaiting to implement-->
                 </fieldset>
 
                 <fieldset><legend>Major List</legend>
+                <input type="submit" value="Select all majors" name="SelectAll">
+                <input type="submit" value="Unselect all majors" name="UnselectAll">
                 <div class="majorBoxes">
                     <p>
-                    <input type="checkbox" name="African/Afr-American Studies" value=1>African/Afr-American Studies<br>
-                    <input type="checkbox" name="American Studies" value=1>American Studies<br>
-                    <input type="checkbox" name="Art: History" value=1>Art: History<br>
-                    <input type="checkbox" name="Art: Studio" value=1>Art: Studio<br>
-                    <input type="checkbox" name="Asian Studies" value=1>Asian Studies<br>
-                    <input type="checkbox" name="Biology" value=1>Biology<br>
-                    <input type="checkbox" name="Biochemistry" value=1>Biochemistry<br>
-                    <input type="checkbox" name="Chemistry" value=1>Chemistry<br>
-                    <input type="checkbox" name="Chinese" value=1>Chinese<br>
-                    <input type="checkbox" name="Cinema and Media Studies" value=1>Cinema and Media Studies<br>
-                    <input type="checkbox" name="Classical Languages" value=1>Classical Languages<br>
-                    <input type="checkbox" name="Classical Studies" value=1>Classical Studies<br>
-                    <input type="checkbox" name="Classics" value=1>Classics<br>
-                    <input type="checkbox" name="Cognitive Studies/Cognitive Science" value=1>Cognitive Studies/Cognitive Science<br>
-                    <input type="checkbox" name="Computer Science" value=1>Computer Science<br>
-                    <input type="checkbox" name="Dance" value=1>Dance<br>
-                    <input type="checkbox" name="Economics" value=1>Economics<br>
-                    <input type="checkbox" name="English" value=1>English<br>
-                    <input type="checkbox" name="Environmental Studies" value=1>Environmental Studies<br>
-                    <input type="checkbox" name="French" value=1>French<br>
-                    <input type="checkbox" name="French & Francophone Studies" value=1>French & Francophone Studies<br>
-                    <input type="checkbox" name="Geology" value=1>Geology<br>
-                    <input type="checkbox" name="German" value=1>German<br>
-                    <input type="checkbox" name="Greek" value=1>Greek<br>
-                    <input type="checkbox" name="History" value=1>History<br>
-                    <input type="checkbox" name="Interdisciplinary or Student-Designed" value=1>Interdisciplinary or Student-Designed<br>
-                    <input type="checkbox" name="Japanese" value=1>Japanese<br>
-                    <input type="checkbox" name="Latin" value=1>Latin<br>
-                    <input type="checkbox" name="Latin American Studies" value=1>Latin American Studies<br>
-                    <input type="checkbox" name="Linguistics" value=1>Linguistics<br>
-                    <input type="checkbox" name="Mathematics" value=1>Mathematics<br>
-                    <input type="checkbox" name="Mathematics/Statistics" value=1>Mathematics/Statistics<br>
-                    <input type="checkbox" name="Media Studies" value=1>Media Studies<br>
-                    <input type="checkbox" name="Music" value=1>Music<br>
-                    <input type="checkbox" name="Neuroscience" value=1>Neuroscience<br>
-                    <input type="checkbox" name="Philosophy" value=1>Philosophy<br>
-                    <input type="checkbox" name="Physics and Astronomy" value=1>Physics and Astronomy<br>
-                    <input type="checkbox" name="Political Science" value=1>Political Science<br>
-                    <input type="checkbox" name="PolSci/International Relations" value=1>PolSci/International Relations<br>
-                    <input type="checkbox" name="Psychology" value=1>Psychology<br>
-                    <input type="checkbox" name="Religion" value=1>Religion<br>
-                    <input type="checkbox" name="Romance Languages and Literature" value=1>Romance Languages and Literature<br>
-                    <input type="checkbox" name="Russian" value=1>Russian<br>
-                    <input type="checkbox" name="Sociology/Anthropology" value=1>Sociology/Anthropology<br>
-                    <input type="checkbox" name="Spanish" value=1>Spanish<br>
-                    <input type="checkbox" name="Theater Arts" value=1>Theater Arts<br>
-                    <input type="checkbox" name="Women's and Gender Studies" value=1>Women's and Gender Studies<br>
-                    <input type="checkbox" name="Women's Studies" value=1>Women's Studies<br>
+                    %s
                     </p>
                     
                     
@@ -125,16 +82,73 @@
 
 
                 </fieldset>
-
             </form>
+            <form>
+                <div class='topmajorqueryinput'>
+                    <fieldset><legend>Most popular major</legend>
+                        <p>
+                            <!-- <input type="radio" name="queryType" value="topMajor">Find most popular major<br> -->
+                            Most popular major in year:
+                                <select name="queryYear">
+                                    <option value="2013">2013</option>
+                                    <option value="2012">2012</option>
+                                    <option value="2011">2011</option>
+                                    <option value="2010">2010</option>
+                                    <option value="2009">2009</option>
+                                    <option value="2008">2008</option>
+                                    <option value="2007">2007</option>
+                                    <option value="2006">2006</option>
+                                    <option value="2005">2005</option>
+                                    <option value="2004">2004</option>
+                                    <option value="2003">2003</option>
+                                    <option value="2002">2002</option>
+                                    <option value="2001">2001</option>                        
+                                </select>
+                            Top:
+                                <select name="topN">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                    <option value="13">13</option>                        
+                                </select>
+                            <!-- <input type="radio" name="queryType" value="normal">Look up number of graduate in year(s) (Need a better name...)<Br> -->
+                            <button type="submit" name='queryType' value="topMajor">Query Top Majors</button>
+
+                        </p>
+                    </fieldset>
+                </div>
+            </form>
+
                 <div class="sourcelinks">
                     <fieldset><legend>Links to source files</legend>
-                    <p>
                     <p class="forClassUse">
                     <a href="webapp.py?showsource=webapp.py">webapp.py</a>
                     <a href="webapp.py?showsource=CarlStats.html">CarlStats.html</a>
-                    <a href="main.css?showsource=main.css">style.css</a>
+                    <a href="webapp.py?showsource=CarlStatsResult.html">CarlStatsResult.html</a>
+                    <a href="webapp.py?showsource=main.css">style.css</a>
+                    <a href="webapp.py?showsource=DataSource.py">DataSource.py</a>
+
+
                     </p>
                     </fieldset>
                 </div>
         </div>
+    	<div class="hints">
+    		<fieldset><legend>Usage:</legend>
+    			<p class="hints">
+    				Select the year(s), gender, and majors you want to query and hit the submit button.<br>
+    				If no major is selected, no query will be sent after hitting submit button.<br>
+    				You can reset the form by clicking the reset button.
+    			</p>
+
+    		</fieldset>
+    	</div>

@@ -2,7 +2,7 @@
 '''
 File:webapp.py
 Authors: Anne Grosse and Jialun "Julian" Luo
-Last edited: 2013/10/10
+Last edited: 2013/10/12
 
 This program will generate a html to the browser to display. It will print a summary or results
 when user inputs are detected.
@@ -30,14 +30,21 @@ class CarlStats:
 		self.content = ''
 		self.closingHtml = '''</body></html>'''
 		
+		self.database = DataSource.DataSource()
+		
 		self.minYear = 2001
 		self.maxYear = 2013
 		
 		self.startYear = 2013
 		self.endYear = 2013
+		
 		self.gender = "Both"
+		
+		self.topMajorYear = 2013
+		self.topN = 5
 	
-		self.isQueried = False
+		self.isMajorQueried = False
+		self.isTopMajorQueried = False
 		
 		self.rowAltTemplate = '<tr class="alt">%s</tr>'
 		self.rowTemplate = '<tr>%s</tr>'
@@ -45,24 +52,29 @@ class CarlStats:
 		self.tableHeadingTemplate = '<th rowspan="%s">%s</th>'
 	 	self.tableTemplate = '<table class="resultTable" border="1" cellpadding="7">%s</table>'
 	 	
-	 	self.rowColor = 0
+	 	self.isRowColored = 0
 	 	
 	 	self.tableHtml = ''
 	 	
-		self.majorList = open('majorList.txt').read().splitlines()
+	 	#Initialize majorInput to {majorName:0}
+		self.majorList = self.database.get_majors()
 		self.majorInput = {}
-		self.initializeMajorInput()
-		self.genderList = ['Male', 'Female', 'Both']
+		self.setAllMajorsInput(0)
 		
 		self.debug = 0
 	
 	
-	def initializeMajorInput(self):
-	    for major in self.majorList:
-			self.majorInput[major] = 0
+	def setAllMajorsInput(self, value):
+		'''
+		Sets the value of all majors in majorInput to the passed in value
+		'''
+		for major in self.majorList:
+			self.majorInput[major] = value
 
 
 	def getShowsourceInput(self, form):
+		'''
+		'''
 		showsource=''
 		if 'showsource' in form:
 			showsource = form['showsource'].value
@@ -85,103 +97,164 @@ class CarlStats:
 	    print 'Content-type: text/plain\r\n\r\n',
 	    print text
 
-
-
 	def displayChosenGender(self):
-		'''Retain user inputs for gender'''
+		'''Show user-chosen gender as selected in the html form'''
 		self.showAsSelected(self.gender, "checked")
 	    
 	def displayChosenYears(self):
-		'''Retain user inputs for year span'''
+		'''Show user-chosen year as selected in the html form'''
 		yearTag = ' selected="selected"'
 		self.showAsSelected(self.startYear, yearTag)
 		endYearIndex = self.openingHtml.find(str('endYear'))
 		self.showAsSelected(self.endYear, yearTag, endYearIndex)
 	    
 	def displayChosenMajors(self):
+	    """Show user-chosen major as selected in the html form"""
 	    majorCheckTag = "checked"
 	    for major in self.majorList:
 	        if self.majorInput.get(major) == 1:
 	            self.showAsSelected(major, majorCheckTag)
 
-
-	
 	def showAsSelected(self, name, tag, indexToStartLooking=0):
-	    index = self.findIndexForSelectionTag(name, indexToStartLooking)
-	    self.insertSelectionTag(index, tag)
-	    
+		"""
+		@param name: the name to be shown as selected in the HTML form
+		@param tag: a html select/check tag
+		Find index of 'name'  and insert 'tag'(s);
+		Helper method to displayChosen**** methods
+		"""
+		index = self.findIndexForSelectionTag(name, indexToStartLooking)
+		self.insertSelectionTag(index, tag)
+
 	def findIndexForSelectionTag(self, name, indexToStartLooking=0):
-	    nameQuotes = '\"' + str(name) + '\"'
-	    return self.openingHtml.find(nameQuotes, indexToStartLooking) + len(nameQuotes)
+		'''
+		@param name the name to be searched for
+		@param indexToStartLooking the index at which to start searching the HTML code
+		Returns the index of the HTML (stored as a string) at which a selection tag should be inserted 
+		(helper method for DisplayChosen*** methods)
+		'''
+		nameQuotes = '\"' + str(name) + '\"'
+		return self.openingHtml.find(nameQuotes, indexToStartLooking) + len(nameQuotes)
 	
 	def insertSelectionTag(self, index, tag):
-	    self.openingHtml = self.openingHtml[:index] + tag + self.openingHtml[index:]
+		'''
+		@param index index of HTML string at which tag is to be inserted
+		@param tag the HTML tag to be inserted
+		Inserts the given HTML tag at the given index in our stored HTML template for generating the page
+		'''
+		self.openingHtml = self.openingHtml[:index] + tag + self.openingHtml[index:]
 	
 	def generateCheckboxCode(self):
+		'''
+		Generates the HTML code to display checkboxes for each major in majorlist. 
+		For now, we generate the majors each time instead of using a static major list because we might rename majors in our database.
+		'''
 		checkboxCode = ""
 		for major in self.majorList:
 			checkboxCode += '<input type="checkbox" name="' + major +'" value=1>' + major + '<br>'
 		return checkboxCode
 	
 	def getMajorInput(self, form):
-	    for major in self.majorList:
-			'''
-			get user inputs in the checkboxes
-			'''
-			if major in form:
-					self.majorInput[major]= int(form[major].value)
-					self.isQueried = True
+	    '''
+	    Extract the user input about majors
+	    '''
+	    if "SelectAll" in form:
+	    	#user chose all majors
+	    	self.setAllMajorsInput(1)
+	    elif "UnselectAll" in form:
+	    	#user chose no majors
+	    	self.setAllMajorsInput(0)
+	    else:
+	    	for major in self.majorList:
+				'''
+				for each major individually selected by user, record this information
+				'''
+				if major in form:
+					self.majorInput[major]= 1
+					self.isMajorQueried = True
+	
+	def getTopNInput(self, form):
+		try:
+			if 'topN' in form:
+				self.topN= int(form['topN'].value)
+		except Exception, e:
+			pass
 	
 	def getYearInput(self, form):
-	    if 'startYear' in form and 'endYear' in form:
-			try: self.startYear = int(form['startYear'].value)
-			except Exception, e:
-			    pass
-			try: self.endYear = int(form['endYear'].value)
-			except Exception, e:
-			    pass
-
-			if self.startYear < self.minYear:
-				self.startYear = self.minYear
-			elif self.startYear > self.maxYear:
-				self.startYear = self.maxYear
-			
-			if self.endYear > self.maxYear:
-				self.endYear = self.maxYear
-			elif self.endYear < self.minYear:
-				self.endYear = self.minYear
-			
-			if self.endYear < self.startYear:
-				self.endYear = self.startYear
-			
-			
-				
-
+		'''
+		Extract the user input about years
+		'''
+		try:
+			if 'startYear' in form and 'endYear' in form:
+				self.startYear = int(form['startYear'].value)
+				self.endYear = int(form['endYear'].value)
+			elif 'queryYear' in form:
+				self.topMajorYear = int(form['queryYear'].value)
+			self.sanitizeYearInput()
+		except Exception, e:
+			pass
+	
+	def sanitizeYearInput(self):
+		'''
+		Sanitize year input so that the year is an integer between our maximum year and minimum year
+		'''
+		if self.startYear < self.minYear:
+			self.startYear = self.minYear
+		elif self.startYear > self.maxYear:
+			self.startYear = self.maxYear
 		
-	        ### if startYear or endYear isn't an int, assigns them default value of 2013
-	        ### there will still be an issue when using DataSource.py if startYear > endYear
+		if self.endYear > self.maxYear:
+			self.endYear = self.maxYear
+		elif self.endYear < self.minYear:
+			self.endYear = self.minYear
+		
+		if self.endYear < self.startYear:
+			self.endYear = self.startYear
+			
+
 	
 	def getGenderInput(self, form):
+	    '''
+	    Extract the user input about genders
+	    '''
 	    if "gender" in form:
 	        if form["gender"].value == "Male" or form["gender"].value == "Female" or form['gender'].value == 'Both':
 	            self.gender = form["gender"].value
 	        ### if user messes with URL and gender isn't male or female, it's assigned default value of "both"
+	
+	def getQueryInput(self, form):
+		'''
+		Extract the user input about query types
+		'''
+		queryName = 'queryType' 
+		if queryName in form:
+			if form[queryName].value == 'normal':
+				self.isMajorQueried = True
+			elif form[queryName].value == 'topMajor':
+				self.isTopMajorQueried = True
 	
 	def getInput(self):
 		'''
 		Get user inputs from the python
 		'''
 		form = cgi.FieldStorage()
-		
-
-		self.getYearInput(form)
 		self.getMajorInput(form)
+		self.getYearInput(form)
 		self.getGenderInput(form)
+		self.getTopNInput(form)
+		self.getQueryInput(form)
 		self.getShowsourceInput(form)
 		
-		
+	def processQuery(self):
+		'''Generate and send different queries to the server based on what received query
+		'''
+		if self.isMajorQueried:
+			self.queryMajorVersusNumGradData()
+		elif self.isTopMajorQueried:
+			self.queryTopPopularMajorInYear(self.topMajorYear, topN = self.topN)
 		
 	def generateResult(self):
+		'''Generate html text for result
+		'''
 		self.content = open('CarlStatsResult.html').read() % self.tableHtml
 		#also do other stuff...
 	
@@ -195,69 +268,85 @@ class CarlStats:
 		row = self.dataTemplate % majorName
 		for elem in listData:
 			row = ''.join( [ row, self.dataTemplate % elem ] )
-		if (self.rowColor % 2):
+		if (self.isRowColored % 2):
 			row = self.rowTemplate % row
 		else:
 			row = self.rowAltTemplate % row
-		self.rowColor += 1
+		self.isRowColored += 1
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
-	def generateTableYearRow(self):
+	def generateTableYearRow(self, startYear, endYear):
 		'''
 		Generate the top row which depends on the year span
 		'''
 		row = self.tableHeadingTemplate % (1, 'YEAR')
-		for year in range(self.startYear, self.endYear + 1):
+		for year in range(startYear, endYear + 1):
 			row = ''.join([row, self.tableHeadingTemplate % (2, year)])
 		row = self.rowTemplate % row
 		majorHeading = self.tableHeadingTemplate % (1, 'MAJOR')
 		row = ''.join([row, self.rowTemplate % majorHeading])
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
-	def generateTable(self):
+	def generateTableFromRowText(self):
+		'''
+		Generate the table html text from table row text.
+		'''
 		self.tableHtml = self.tableTemplate % self.tableHtml
 
-	
-	def queryData(self):
-		if self.isQueried:
-			database = DataSource.DataSource()
-			self.generateTableYearRow()
-			for major in self.majorList:
-				if self.majorInput[major] != 0:
-					'''
-					@todo: gender specification hasn't been implemented yet!!!
-					'''
-					majorName = major
-					majorNumGradDict = database.get_graduates_in_year_range(self.startYear, self.endYear, majorName, self.gender)
-					numGradList = []
-					for year in range(self.startYear, self.endYear+1):
-						numGradList.append(majorNumGradDict[year])
-					
-					self.generateTableDataRow(majorName, numGradList)
-					
-			self.generateTable()
-			self.generateResult()
+	def queryMajorVersusNumGradData(self):
+		'''
+		Parse the inputs and query major and number of graduates from the data base.
+		Present results in a table where each row presents a major and the number of majors in year(s)
+		'''
+		self.generateTableYearRow(self.startYear, self.endYear)
+		for major in self.majorList:
+			if self.majorInput[major] != 0:
+				majorName = major
+				majorNumGradDict = self.database.get_graduates_in_year_range(self.startYear, \
+														self.endYear, majorName, self.gender)
+				numGradList = []
+				for year in range(self.startYear, self.endYear+1):
+					numGradList.append(majorNumGradDict[year])
+				self.generateTableDataRow(majorName, numGradList)
+				
+		self.generateTableFromRowText()
+		self.generateResult()
+
+	def queryTopPopularMajorInYear(self, year, topN = 5):
+		'''
+		Query the database for top major and its major counts in the given year.
+		'''
+		topMajorGradTupleInYear = self.database.get_top_N_popular_major_in_year(year, topN)
+		self.generateTableYearRow(year, year)
+
+		for tuple in topMajorGradTupleInYear:
+			self.generateTableDataRow(tuple[0], [tuple[1]])
+		
+		self.generateTableFromRowText()
+		self.generateResult()
+		
+		
+		
 
 	
-
 	def generate(self):
 		'''
 		Calling this to complete the html file
-		@todo: stubs!!!
 		'''
 		
 		print "Content-type: text/html\r\r\n\n",
+		self.openingHtml = self.openingHtml % self.generateCheckboxCode()
 		self.displayChosenYears()
 		self.displayChosenGender()
 		self.displayChosenMajors()
-		output = ''.join([self.openingHtml % self.generateCheckboxCode(), self.content, self.closingHtml])
+		output = ''.join([self.openingHtml, self.content, self.closingHtml])
 		print output
 		
 
 if __name__ == "__main__":
 	site = CarlStats()
 	site.getInput()
-	site.queryData()
+	site.processQuery()
 	site.generate()
 
 	

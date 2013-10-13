@@ -30,6 +30,8 @@ class CarlStats:
 		self.content = ''
 		self.closingHtml = '''</body></html>'''
 		
+		self.database = DataSource.DataSource()
+		
 		self.minYear = 2001
 		self.maxYear = 2013
 		
@@ -45,24 +47,32 @@ class CarlStats:
 		self.tableHeadingTemplate = '<th rowspan="%s">%s</th>'
 	 	self.tableTemplate = '<table class="resultTable" border="1" cellpadding="7">%s</table>'
 	 	
-	 	self.rowColor = 0
+	 	self.isRowColored = 0
 	 	
 	 	self.tableHtml = ''
 	 	
-		self.majorList = open('majorList.txt').read().splitlines()
+	 	#Initialize majorInput to {majorName:0}
+		self.majorList = self.database.get_majors()
 		self.majorInput = {}
-		self.initializeMajorInput()
-		self.genderList = ['Male', 'Female', 'Both']
+		self.setAllMajorsInput(0)
+		
+		
+		
 		
 		self.debug = 0
 	
 	
-	def initializeMajorInput(self):
-	    for major in self.majorList:
-			self.majorInput[major] = 0
+	def setAllMajorsInput(self, value):
+		'''
+		Sets the value of all majors in majorInput to the passed in value
+		'''
+		for major in self.majorList:
+			self.majorInput[major] = value
 
 
 	def getShowsourceInput(self, form):
+		'''
+		'''
 		showsource=''
 		if 'showsource' in form:
 			showsource = form['showsource'].value
@@ -85,54 +95,85 @@ class CarlStats:
 	    print 'Content-type: text/plain\r\n\r\n',
 	    print text
 
-
-
 	def displayChosenGender(self):
-		'''Retain user inputs for gender'''
+		'''Show user-chosen gender as selected in the html form'''
 		self.showAsSelected(self.gender, "checked")
 	    
 	def displayChosenYears(self):
-		'''Retain user inputs for year span'''
+		'''Show user-chosen year as selected in the html form'''
 		yearTag = ' selected="selected"'
 		self.showAsSelected(self.startYear, yearTag)
 		endYearIndex = self.openingHtml.find(str('endYear'))
 		self.showAsSelected(self.endYear, yearTag, endYearIndex)
 	    
 	def displayChosenMajors(self):
+	    """Show user-chosen major as selected in the html form"""
 	    majorCheckTag = "checked"
 	    for major in self.majorList:
 	        if self.majorInput.get(major) == 1:
 	            self.showAsSelected(major, majorCheckTag)
 
-
-	
 	def showAsSelected(self, name, tag, indexToStartLooking=0):
-	    index = self.findIndexForSelectionTag(name, indexToStartLooking)
-	    self.insertSelectionTag(index, tag)
-	    
+		"""
+		@param name: the name to be shown as selected in the HTML form
+		@param tag: a html select/check tag
+		Find index of 'name'  and insert 'tag'(s);
+		Helper method to displayChosen**** methods
+		"""
+		index = self.findIndexForSelectionTag(name, indexToStartLooking)
+		self.insertSelectionTag(index, tag)
+
 	def findIndexForSelectionTag(self, name, indexToStartLooking=0):
-	    nameQuotes = '\"' + str(name) + '\"'
-	    return self.openingHtml.find(nameQuotes, indexToStartLooking) + len(nameQuotes)
+		'''
+		@param name the name to be searched for
+		@param indexToStartLooking the index at which to start searching the HTML code
+		Returns the index of the HTML (stored as a string) at which a selection tag should be inserted 
+		(helper method for DisplayChosen*** methods)
+		'''
+		nameQuotes = '\"' + str(name) + '\"'
+		return self.openingHtml.find(nameQuotes, indexToStartLooking) + len(nameQuotes)
 	
 	def insertSelectionTag(self, index, tag):
-	    self.openingHtml = self.openingHtml[:index] + tag + self.openingHtml[index:]
+		'''
+		@param index index of HTML string at which tag is to be inserted
+		@param tag the HTML tag to be inserted
+		Inserts the given HTML tag at the given index in our stored HTML template for generating the page
+		'''
+		self.openingHtml = self.openingHtml[:index] + tag + self.openingHtml[index:]
 	
 	def generateCheckboxCode(self):
+		'''
+		Generates the HTML code to display checkboxes for each major in majorlist. 
+		For now, we generate the majors each time instead of using a static major list because we might rename majors in our database.
+		'''
 		checkboxCode = ""
 		for major in self.majorList:
 			checkboxCode += '<input type="checkbox" name="' + major +'" value=1>' + major + '<br>'
 		return checkboxCode
 	
 	def getMajorInput(self, form):
-	    for major in self.majorList:
-			'''
-			get user inputs in the checkboxes
-			'''
-			if major in form:
-					self.majorInput[major]= int(form[major].value)
-					self.isQueried = True
+	    '''
+	    Extract the user input about majors
+	    '''
+	    if "SelectAll" in form:
+	    	#user chose all majors
+	    	self.setAllMajorsInput(1)
+	    elif "UnselectAll" in form:
+	    	#user chose no majors
+	    	self.setAllMajorsInput(0)
+	    else:		
+	    	for major in self.majorList:
+				'''
+				for each major individually selected by user, record this information
+				'''
+				if major in form:
+						self.majorInput[major]= 1
+						self.isQueried = True
 	
 	def getYearInput(self, form):
+	    '''
+	    Extract the user input about years
+	    '''
 	    if 'startYear' in form and 'endYear' in form:
 			try: self.startYear = int(form['startYear'].value)
 			except Exception, e:
@@ -162,6 +203,9 @@ class CarlStats:
 	        ### there will still be an issue when using DataSource.py if startYear > endYear
 	
 	def getGenderInput(self, form):
+	    '''
+	    Extract the user input about genders
+	    '''
 	    if "gender" in form:
 	        if form["gender"].value == "Male" or form["gender"].value == "Female" or form['gender'].value == 'Both':
 	            self.gender = form["gender"].value
@@ -182,6 +226,8 @@ class CarlStats:
 		
 		
 	def generateResult(self):
+		'''Generate html text for result
+		'''
 		self.content = open('CarlStatsResult.html').read() % self.tableHtml
 		#also do other stuff...
 	
@@ -195,11 +241,11 @@ class CarlStats:
 		row = self.dataTemplate % majorName
 		for elem in listData:
 			row = ''.join( [ row, self.dataTemplate % elem ] )
-		if (self.rowColor % 2):
+		if (self.isRowColored % 2):
 			row = self.rowTemplate % row
 		else:
 			row = self.rowAltTemplate % row
-		self.rowColor += 1
+		self.isRowColored += 1
 		self.tableHtml = ''.join([self.tableHtml, row])
 	
 	def generateTableYearRow(self):
@@ -220,21 +266,27 @@ class CarlStats:
 	
 	def queryData(self):
 		if self.isQueried:
-			database = DataSource.DataSource()
+			
 			self.generateTableYearRow()
 			for major in self.majorList:
 				if self.majorInput[major] != 0:
 					'''
 					@todo: gender specification hasn't been implemented yet!!!
 					'''
-					majorName = major
-					majorNumGradDict = database.get_graduates_in_year_range(self.startYear, self.endYear, majorName, self.gender)
-					numGradList = []
-					for year in range(self.startYear, self.endYear+1):
-						numGradList.append(majorNumGradDict[year])
-					
-					self.generateTableDataRow(majorName, numGradList)
-					
+					try:
+						majorName = major
+						majorNumGradDict = self.database.get_graduates_in_year_range(self.startYear, \
+																self.endYear, majorName, self.gender)
+						numGradList = []
+						for year in range(self.startYear, self.endYear+1):
+							numGradList.append(majorNumGradDict[year])
+	
+						self.generateTableDataRow(majorName, numGradList)
+					except:
+						print 'content-type: text/plain\r\n\r\n',
+						print majorName
+						print majorNumGradDict
+						exit()
 			self.generateTable()
 			self.generateResult()
 
@@ -243,14 +295,14 @@ class CarlStats:
 	def generate(self):
 		'''
 		Calling this to complete the html file
-		@todo: stubs!!!
 		'''
 		
 		print "Content-type: text/html\r\r\n\n",
+		self.openingHtml = self.openingHtml % self.generateCheckboxCode()
 		self.displayChosenYears()
 		self.displayChosenGender()
 		self.displayChosenMajors()
-		output = ''.join([self.openingHtml % self.generateCheckboxCode(), self.content, self.closingHtml])
+		output = ''.join([self.openingHtml, self.content, self.closingHtml])
 		print output
 		
 

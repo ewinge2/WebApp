@@ -1,0 +1,31 @@
+def returnGenderInput(self, form):
+	    '''
+	    Extract the user input about genders
+	    '''
+	    gender = "Both"
+	    if "gender" in form and not form["gender"].value == "Male" and not form["gender"].value == "Female":
+	        gender = form["gender"].value
+	    return gender
+
+	def getMajorInput(self, form):
+	    '''
+	    Extract the user input about majors
+	    '''
+	    gender = self.returnGenderInput(form)
+	    if "SelectAll" in form:
+	    	#user chose all majors
+	    	self.input[gender] = self.majorList
+	    elif "UnselectAll" in form:
+	    	#user chose no majors
+	    	self.input[gender] = []
+	    else:
+	    	selectedMajors = []
+	    	for major in self.majorList:
+				'''
+				for each major individually selected by user, record this information
+				'''
+				if major in form:
+					selectedMajors.append(major)
+			self.input[gender] = selectedMajors
+
+also must change the display gender method, since there no longer is a self.gender 

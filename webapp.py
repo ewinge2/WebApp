@@ -182,6 +182,8 @@ class CarlStats:
 			self.end_year = max(self.years)
 		if self.start_year > self.end_year:
 			self.start_year = self.end_year
+		self.table.start_year = self.start_year
+		self.table.end_year = self.end_year
 
 	def get_gender_input(self):
 		'''Extract the user input about genders'''
@@ -253,12 +255,12 @@ class CarlStats:
 #		
 #		return row
 	
-	def generate_table_html(self, rowHtml, tableClass = None, border = 1, cellpadding = 5):
-		'''
-		Encapsulates given input with 
-		<table class="tableClass" border = "border" cellpadding = cellpadding> rowHtml </table>
-		'''
-		return html_templates.table_template % (tableClass, border, cellpadding, rowHtml)
+#	def generate_table_html(self, rowHtml, tableClass = None, border = 1, cellpadding = 5):
+#		'''
+#		Encapsulates given input with 
+#		<table class="tableClass" border = "border" cellpadding = cellpadding> rowHtml </table>
+#		'''
+#		return html_templates.table_template % (tableClass, border, cellpadding, rowHtml)
 
 #	def generate_table(self, dictionaryData, tableClass  = 'resultTable', border = 1, cellpadding = 7):
 #		'''
@@ -327,21 +329,6 @@ class CarlStats:
 		self.display_chosen_majors()
 		self.close_html()
 		print self.html
-
-if __name__ == "__main__":
-	site = CarlStats()
-	site.get_input()
-	site.process_query()
-	site.generate()
-	
-
-class Genders:
-	'''a quick python version of an enum contains the strings
-	 of the genders and a list for checking sanitizing input'''
-	male = 'Male'
-	female = 'Female'
-	both = 'Both'
-	genders = ['Male','Female','Both']
 
 
 class Table:
@@ -429,7 +416,14 @@ class Table:
 		
 		return self.generate_table_html(rowsHtml, tableClass, border, cellpadding)
 	
-	
+class Genders:
+	'''a quick python version of an enum contains the strings
+	 of the genders and a list for checking sanitizing input'''
+	male = 'Male'
+	female = 'Female'
+	both = 'Both'
+	genders = ['Male','Female','Both']
+
 	
 class html_templates:
 	'''enum for html templates'''
@@ -439,3 +433,10 @@ class html_templates:
 	data_template = '<td>%s</td>'
 	table_heading_template = '<th rowspan="%s">%s</th>'
 	table_template = '<table class="%s" border="%s" cellpadding="%s">%s</table>'
+
+
+if __name__ == "__main__":
+	site = CarlStats()
+	site.get_input()
+	site.process_query()
+	site.generate()

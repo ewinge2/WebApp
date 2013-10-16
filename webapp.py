@@ -291,27 +291,27 @@ class CarlStats:
 #		
 #		return self.generate_table_html(rowsHtml, tableClass, border, cellpadding)
 #
-#	def get_major_versus_num_grad_data(self):
-#		'''
-#		Query for every major in the self.input 
-#		@return : a dictionary {key == majorName, 
-#				value == [] a list of number of graduates ordered by ascending year}
-#		'''
-#		genderMajorNumGradDictionary = {}
-#		
-#		########################
-#		####   STUBBING THE FOR LOOP'S CONDITION FROM self.input to ['Male', 'Female', 'Both']
-#		########################
-#		for gender in ['Male', 'Female', 'Both']:
-#			genderMajorNumGradDictionary[gender] = {}
-#			for majorName in self.majors:
-#				if majorName in self.input:
-#					genderMajorNumGradDictionary[gender][majorName] = []
-#					rawData = self.data_source.get_graduates_in_year_range(self.start_year,\
-#															self.end_year, majorName, gender)
-#					for i in range(self.start_year, self.end_year+1):
-#						genderMajorNumGradDictionary[gender][majorName].append(rawData[i])
-#		return genderMajorNumGradDictionary
+	def get_major_versus_num_grad_data(self):
+		'''
+		Query for every major in the self.input 
+		@return : a dictionary {key == majorName, 
+				value == [] a list of number of graduates ordered by ascending year}
+		'''
+		genderMajorNumGradDictionary = {}
+		
+		########################
+		####   STUBBING THE FOR LOOP'S CONDITION FROM self.input to ['Male', 'Female', 'Both']
+		########################
+		for gender in ['Male', 'Female', 'Both']:
+			genderMajorNumGradDictionary[gender] = {}
+			for majorName in self.majors:
+				if majorName in self.input:
+					genderMajorNumGradDictionary[gender][majorName] = []
+					rawData = self.data_source.get_graduates_in_year_range(self.start_year,\
+															self.end_year, majorName, gender)
+					for i in range(self.start_year, self.end_year+1):
+						genderMajorNumGradDictionary[gender][majorName].append(rawData[i])
+		return genderMajorNumGradDictionary
 
 	def close_html(self):
 		self.html = ''.join([self.html, '</body></html>'])

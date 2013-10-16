@@ -53,6 +53,8 @@ class CarlStats:
 		self.input = []
 		
 		self.form = cgi.FieldStorage()
+		
+		self.table = Table(self.start_year, self.end_year, self.majors)
 			
 	def get_showsource_input(self):
 		'''
@@ -206,13 +208,151 @@ class CarlStats:
 		'''Generate and send different queries to the server based on what received query
 		'''
 		if self.is_major_queried:
-			resultHtml = self.get_result_html() % self.generate_table(self.get_major_versus_num_grad_data())
+			resultHtml = self.get_result_html() % self.table.generate_table(self.get_major_versus_num_grad_data())
 			self.html = ''.join([self.html, resultHtml])
 
 	def get_result_html(self):
 		return open('CarlStatsResult.html').read()
 	
-	def generate_table_row(self, firstColumn, listData, endColumnNote, isHeader = False, \
+#	def generate_table_row(self, firstColumn, listData, endColumnNote, isHeader = False, \
+#								firstColumnRowspan = 1, cellRowspan = 1, isColored = True):
+#		'''Generate a table row in html text.'''
+#		###############################################
+#		### DOCUMENT THIS!!!!!!
+#		###############################################
+#		template = ''
+#		row = ''
+#		
+#		'''initialize the template to either heading style or data cell style
+#		according to the given boolean isHeader, whose default value is False 
+#		'''
+#		if isHeader:
+#			template = html_templates.table_heading_template
+#		else:
+#			template = html_templates.table_data_template	
+#		
+#		if firstColumn:
+#			'''	If a major name is given, put it at the first column and set its firstColumnRowspan (default = 1)'''
+#			row = template % (firstColumnRowspan, firstColumn)
+#			
+#		'''Set the rowspan to cellRowspan because we are adding inner cells now'''
+#		template = template % (cellRowspan, "%s")
+#		
+#		for elem in listData:
+#			'''	insert all data from the given listData into the row'''
+#			row = ''.join( [ row, template % elem ] )
+#		
+#		if endColumnNote:
+#			'''Append the endColumnNote to the last column of this row'''
+#			row = ''.join([row, template % (endColumnNote)])
+#		
+#		if isColored:
+#			row = html_templates.row_alt_template % row
+#		else:
+#			row = html_templates.row_template % row
+#		
+#		return row
+	
+	def generate_table_html(self, rowHtml, tableClass = None, border = 1, cellpadding = 5):
+		'''
+		Encapsulates given input with 
+		<table class="tableClass" border = "border" cellpadding = cellpadding> rowHtml </table>
+		'''
+		return html_templates.table_template % (tableClass, border, cellpadding, rowHtml)
+
+#	def generate_table(self, dictionaryData, tableClass  = 'resultTable', border = 1, cellpadding = 7):
+#		'''
+#		@return: a well-formmatted table in html text.
+#		Basically is <table> ... </table>
+#		'''
+#		headerYearRow = Table.generate_row('Year', range(self.start_year, self.end_year+1), 'GENDER', \
+#							isHeader=True, firstColumnRowspan=1, cellRowspan=2, isColored=False)
+#		headerMajorRow = Table.generate_row('MAJOR', [], '', isHeader=True,\
+#							firstColumnRowspan=1, cellRowspan=1, isColored=False)
+#
+#		row = ''
+#		rowsHtml = ''
+#		isRowColored = True
+#		
+#		for major in self.majors:
+#			majorName = major
+# 			
+#			for gender in dictionaryData:
+#				if major in dictionaryData[gender]:
+#					row = Table.generate_row(majorName, dictionaryData[gender][major], gender,\
+#											 firstColumnRowspan=3, isColored = isRowColored)
+#					rowsHtml = ''.join([rowsHtml, row])
+#					'''This is to toggle the second line for values of different gender'''
+#					majorName = None
+#			'''This is used for switching colored row and not colored row between majors'''
+#			isRowColored = not isRowColored
+#		
+#		rowsHtml = ''.join([headerYearRow, headerMajorRow, rowsHtml])
+#		
+#		return self.generate_table_html(rowsHtml, tableClass, border, cellpadding)
+#
+#	def get_major_versus_num_grad_data(self):
+#		'''
+#		Query for every major in the self.input 
+#		@return : a dictionary {key == majorName, 
+#				value == [] a list of number of graduates ordered by ascending year}
+#		'''
+#		genderMajorNumGradDictionary = {}
+#		
+#		########################
+#		####   STUBBING THE FOR LOOP'S CONDITION FROM self.input to ['Male', 'Female', 'Both']
+#		########################
+#		for gender in ['Male', 'Female', 'Both']:
+#			genderMajorNumGradDictionary[gender] = {}
+#			for majorName in self.majors:
+#				if majorName in self.input:
+#					genderMajorNumGradDictionary[gender][majorName] = []
+#					rawData = self.data_source.get_graduates_in_year_range(self.start_year,\
+#															self.end_year, majorName, gender)
+#					for i in range(self.start_year, self.end_year+1):
+#						genderMajorNumGradDictionary[gender][majorName].append(rawData[i])
+#		return genderMajorNumGradDictionary
+
+	def close_html(self):
+		self.html = ''.join([self.html, '</body></html>'])
+
+	def generate(self):
+		############################
+		####'''REDOCUMENT THIS !!!!!'''
+		############################
+		print "Content-type: text/html\r\r\n\n",
+		self.html = self.html % self.generate_checkbox_html()
+		self.dispaly_chosen_years()
+		self.display_chosen_gender()
+		self.display_chosen_majors()
+		self.close_html()
+		print self.html
+
+if __name__ == "__main__":
+	site = CarlStats()
+	site.get_input()
+	site.process_query()
+	site.generate()
+	
+
+class Genders:
+	'''a quick python version of an enum contains the strings
+	 of the genders and a list for checking sanitizing input'''
+	male = 'Male'
+	female = 'Female'
+	both = 'Both'
+	genders = ['Male','Female','Both']
+
+
+class Table:
+	'''a class capable of generating a table in html formatting'''
+	def __init__(self, start_year, end_year, majors):
+		self.start_year = start_year
+		self.end_year = end_year
+		self.majors = majors
+	
+	
+	def generate_row(self, firstColumn, listData, endColumnNote, isHeader = False, \
 								firstColumnRowspan = 1, cellRowspan = 1, isColored = True):
 		'''Generate a table row in html text.'''
 		###############################################
@@ -251,21 +391,21 @@ class CarlStats:
 		
 		return row
 	
-	def generate_table_html(self, rowHtml, tableClass = None, border = 1, cellpadding = 5):
+	def generate_html(self, rowHtml, tableClass = None, border = 1, cellpadding = 5):
 		'''
 		Encapsulates given input with 
 		<table class="tableClass" border = "border" cellpadding = cellpadding> rowHtml </table>
 		'''
 		return html_templates.table_template % (tableClass, border, cellpadding, rowHtml)
-
+	
 	def generate_table(self, dictionaryData, tableClass  = 'resultTable', border = 1, cellpadding = 7):
 		'''
 		@return: a well-formmatted table in html text.
 		Basically is <table> ... </table>
 		'''
-		headerYearRow = self.generate_table_row('Year', range(self.start_year, self.end_year+1), 'GENDER', \
+		headerYearRow = self.generate_row('Year', range(self.start_year, self.end_year+1), 'GENDER', \
 							isHeader=True, firstColumnRowspan=1, cellRowspan=2, isColored=False)
-		headerMajorRow = self.generate_table_row('MAJOR', [], '', isHeader=True,\
+		headerMajorRow = self.generate_row('MAJOR', [], '', isHeader=True,\
 							firstColumnRowspan=1, cellRowspan=1, isColored=False)
 
 		row = ''
@@ -274,10 +414,10 @@ class CarlStats:
 		
 		for major in self.majors:
 			majorName = major
- 			
+			
 			for gender in dictionaryData:
 				if major in dictionaryData[gender]:
-					row = self.generate_table_row(majorName, dictionaryData[gender][major], gender,\
+					row = Table.generate_row(majorName, dictionaryData[gender][major], gender,\
 											 firstColumnRowspan=3, isColored = isRowColored)
 					rowsHtml = ''.join([rowsHtml, row])
 					'''This is to toggle the second line for values of different gender'''
@@ -288,60 +428,10 @@ class CarlStats:
 		rowsHtml = ''.join([headerYearRow, headerMajorRow, rowsHtml])
 		
 		return self.generate_table_html(rowsHtml, tableClass, border, cellpadding)
-
-	def get_major_versus_num_grad_data(self):
-		'''
-		Query for every major in the self.input 
-		@return : a dictionary {key == majorName, 
-				value == [] a list of number of graduates ordered by ascending year}
-		'''
-		genderMajorNumGradDictionary = {}
-		
-		########################
-		####   STUBBING THE FOR LOOP'S CONDITION FROM self.input to ['Male', 'Female', 'Both']
-		########################
-		for gender in ['Male', 'Female', 'Both']:
-			genderMajorNumGradDictionary[gender] = {}
-			for majorName in self.majors:
-				if majorName in self.input:
-					genderMajorNumGradDictionary[gender][majorName] = []
-					rawData = self.data_source.get_graduates_in_year_range(self.start_year,\
-															self.end_year, majorName, gender)
-					for i in range(self.start_year, self.end_year+1):
-						genderMajorNumGradDictionary[gender][majorName].append(rawData[i])
-		return genderMajorNumGradDictionary
-
-	def close_html(self):
-		self.html = ''.join([self.html, '</body></html>'])
-
-	def generate(self):
-		############################
-		####'''REDOCUMENT THIS !!!!!'''
-		############################
-		print "Content-type: text/html\r\r\n\n",
-		self.html = self.html % self.generate_checkbox_html()
-		self.dispaly_chosen_years()
-		self.display_chosen_gender()
-		self.display_chosen_majors()
-		self.close_html()
-		print self.html
-
-if __name__ == "__main__":
-	site = CarlStats()
-	site.get_input()
-	site.process_query()
-	site.generate()
 	
-
-class Genders():
-	'''a quick python version of an enum contains the strings
-	 of the genders and a list for checking sanitizing input'''
-	male = 'Male'
-	female = 'Female'
-	both = 'Both'
-	genders = ['Male','Female','Both']
 	
-class html_templates():
+	
+class html_templates:
 	'''enum for html templates'''
 	row_alt_template = '<tr class="alt">%s</tr>'
 	row_template = '<tr>%s</tr>'

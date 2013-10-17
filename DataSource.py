@@ -28,16 +28,17 @@ class DataSource:
         results = {}
         gender_code = self.convert_gender_to_code(gender)
         if(gender_code == 2):
-            male_dict = self.get_all_graduates_from_year(year, 0)
-            female_dict = self.get_all_graduates_from_year(year, 1)
+            male_dict = self.get_all_graduates_from_year(year, Genders.male)
+            female_dict = self.get_all_graduates_from_year(year, Genders.female)
             return self.add_dictionaries(male_dict, female_dict)
         
         majors = self.get_major_codes()
         for major in majors:
+            major = self.get_sanitized_major_name(major)
             query = "SELECT majors.major, majorcounts.graduates FROM majorcounts, majors WHERE majorcounts.year = %s AND majorcounts.gender = %s AND majorcounts.major = %s AND majors.majorcode = %s;" %(year, gender_code, major, major)
             self.cursor.execute(query)
             for k,v in self.cursor.fetchall():
-                results.setdefault(k,[]).append(v)    
+                results[k] = v   
         return results
 
         
@@ -53,11 +54,10 @@ class DataSource:
            gender is a string. Throws an exception if the specified gender
            isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
-        return self.get_graduates_in_year_range(2000,2013,major,gender)
+        return self.get_graduates_in_year_range(2001,2013,major,gender)
         
     def get_graduates_in_year_range(self, start_year, end_year, major = 'Total', gender = 'Both'):
-        """Returns key is year, value is counts,
-            a dictionary of the total number of graduates with a given
+        """returns a dictionary of the total number of graduates with a given
            major and given gender in all years in the range specified by the user.
            
            year_start and year_end are integers. year_start and year_end specify
@@ -74,19 +74,21 @@ class DataSource:
         results = {}
         gender_code = self.convert_gender_to_code(gender)
         if gender_code == 2:
-            male_dict = self.get_graduates_in_year_range(start_year, end_year, major, 0)
-            female_dict = self.get_graduates_in_year_range(start_year, end_year, major, 1)
+            male_dict = self.get_graduates_in_year_range(start_year, end_year, major, Genders.male)
+            female_dict = self.get_graduates_in_year_range(start_year, end_year, major, Genders.female)
             return self.add_dictionaries(male_dict, female_dict)
         if major == 'Total' or major == self.get_code_of_total_graduates():
             major = self.get_code_of_total_graduates()
         else:
+            major = self.get_sanitized_major_name(major)
             query = "SELECT majorcode FROM majors WHERE major = '%s';" % (major)
             self.cursor.execute(query)
             major = self.cursor.fetchone()[0]
+        major = self.get_sanitized_major_name(major)
         query = "SELECT year, graduates FROM majorcounts WHERE (year BETWEEN %s AND %s) AND major = %s AND gender = %s;"%(start_year, end_year, major, gender_code)
         self.cursor.execute(query)
         for k,v in self.cursor.fetchall():
-            results.setdefault(k,[]).append(v)
+            results[k] = v
         return results
         
     def get_graduates_from_year(self, year, major = 'Total', gender = 'Both'):
@@ -102,18 +104,21 @@ class DataSource:
            isn't 'Male', 'Female', or 'Both'. If gender is Both, graduates of 
            any gender are considered."""
         gender_code = self.convert_gender_to_code(gender)
+        
         if gender_code == 2:
-            male = self.get_graduates_from_year(year, major, 0)
-            female = self.get_graduates_from_year(year, major, 1)
+            male = self.get_graduates_from_year(year, major, Genders.male)
+            female = self.get_graduates_from_year(year, major, Genders.female)
             return male + female   
-	if(major == 'Total'):
-            major = self.total_majors_code
+        
+        if(major == 'Total'):
+            major_code = self.total_majors_code
         else:
+            major = self.get_sanitized_major_name(major)
             query = "SELECT majorcode FROM majors WHERE major = '%s';" %(major)
             self.cursor.execute(query)
-            major = self.cursor.fetchone()[0]
+            major_code = self.cursor.fetchone()[0]
 
-        query = "SELECT graduates FROM majorcounts WHERE year = %s AND major = %s AND gender = %s;"%(year,major,gender_code)
+        query = "SELECT graduates FROM majorcounts WHERE year = %s AND major = %s AND gender = %s;"%(year,major_code,gender_code)
         self.cursor.execute(query)
         return self.cursor.fetchone()[0]
     
@@ -141,17 +146,7 @@ class DataSource:
            number of degrees awarded is different from the total number of 
            graduates because some graduates may be awarded degrees in mutliple 
            majors."""
-        male = {}
-        total = {}
-        query = "SELECT year, graduates FROM majorcounts WHERE major = %s AND gender = %s;" %(self.total_majors_code, 0)
-        self.cursor.execute(query)
-        for k,v in self.cursor.fetchall():
-                male.setdefault(k,[]).append(v)
-        query = "SELECT year, graduates FROM majorcounts WHERE major = %s AND gender = %s;" %(self.total_majors_code, 1)
-        self.cursor.execute(query)
-        for k,v in self.cursor.fetchall():
-                total[k] = male[k][0] + v
-        return total
+        return self.get_number_of_degrees_in_year_range(2001, 2013)
 
 
     
@@ -169,14 +164,14 @@ class DataSource:
            years in our dataset."""
         male = {}
         total = {}
-        query = "SELECT year, graduates FROM majorcounts WHERE (year BETWEEN %s AND %s) AND major = %s AND gender = %s;" %(start_year, end_year, self.total_graduates_code, 0)
+        query = "SELECT year, graduates FROM majorcounts WHERE (year BETWEEN %s AND %s) AND major = %s AND gender = %s;" %(start_year, end_year, self.total_majors_code, 0)
         self.cursor.execute(query)
         for k,v in self.cursor.fetchall():
-		male[k] = v
-        query = "SELECT year, graduates FROM majorcounts WHERE (year BETWEEN %s AND %s) AND major = %s AND gender = %s;" %(start_year, end_year, self.total_graduates_code, 1)
+            male[k] = v
+        query = "SELECT year, graduates FROM majorcounts WHERE (year BETWEEN %s AND %s) AND major = %s AND gender = %s;" %(start_year, end_year, self.total_majors_code, 1)
         self.cursor.execute(query)
         for k,v in self.cursor.fetchall():
-		total[k] = male[k] + v
+            total[k] = male[k] + v
         return total
            
     
@@ -210,16 +205,16 @@ class DataSource:
     def add_dictionaries(self, a, b):
         '''helper method merges two dictionaries without overwriting keys while summing the values'''
         for k in a:
-            b[k][0] += a[k][0]
+            b[k] += a[k]
         return b
     
     def convert_gender_to_code(self, gender):
         '''converts string (Male, Female, Both) to numerical value used in the table'''
-        if(gender == "Male"):
+        if(gender == Genders.male):
             return 0
-        elif(gender == "Female"):
+        elif(gender == Genders.female):
             return 1
-        elif(gender == "Both"):
+        elif(gender == Genders.both):
             return 2
         elif(gender == 0 or gender == 1):
             return gender
@@ -237,3 +232,22 @@ class DataSource:
         query = "SELECT majorcode FROM majors WHERE major = 'Total Majors';" 
         self.cursor.execute(query)
         return self.cursor.fetchone()[0]
+    
+    def get_sanitized_major_name(self, major):
+        '''changes women's majors into women''s majors which makes them usable in queries'''
+
+        if isinstance(major, basestring):
+            if(major.find('\'') == -1):
+                return major
+            major = major[:major.find('\'')] + '\'' + major[major.find('\''):]
+            return major
+        else:
+            return major
+
+class Genders:
+    '''a quick python version of an enum contains the strings
+     of the genders and a list for checking sanitizing input'''
+    male = 'Male'
+    female = 'Female'
+    both = 'Both'
+    genders = ['Male','Female','Both']
